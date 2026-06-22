@@ -268,8 +268,16 @@
         setTimeout(() => { statusEl.textContent = ''; statusEl.className = 'status'; }, 2500);
     }
 
-    function closePane() {
-        try { Office.addin.hide(); } catch (e) { /* older Outlook — leave open */ }
+    async function closePane() {
+        try {
+            if (Office.addin && typeof Office.addin.hide === 'function') {
+                await Office.addin.hide();
+            } else {
+                window.close();
+            }
+        } catch (e) {
+            window.close();
+        }
     }
 
     insertBtn.addEventListener('click', () => {
