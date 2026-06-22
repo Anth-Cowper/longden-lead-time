@@ -17,7 +17,15 @@
         header {
             background: #2b5a39;
             color: white;
-            padding: 0.9rem 1.1rem;
+            padding: 0.9rem 1.1rem 0;
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding-bottom: 0.75rem;
         }
 
         header h1 {
@@ -33,12 +41,37 @@
             margin-top: 0.1rem;
         }
 
+        /* Header tab bar sits at the bottom of the header */
+        .header-tabs {
+            display: flex;
+        }
+
+        .header-tab {
+            padding: 0.45rem 0.9rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.55);
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: color 0.15s, border-color 0.15s;
+        }
+
+        .header-tab.active {
+            color: white;
+            border-bottom-color: white;
+        }
+
         main { padding: 1.1rem; }
 
-        /* Mode toggle — 2×2 grid */
+        .page { display: none; }
+        .page.active { display: block; }
+
+        /* Mode toggle — 3 buttons in a row */
         .toggle {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            display: flex;
             border: 1.5px solid #2b5a39;
             border-radius: 5px;
             overflow: hidden;
@@ -46,6 +79,7 @@
         }
 
         .toggle-btn {
+            flex: 1;
             padding: 0.45rem 0.5rem;
             font-size: 0.78rem;
             font-weight: 600;
@@ -57,8 +91,7 @@
             transition: background 0.15s, color 0.15s;
         }
 
-        .toggle-btn:nth-child(odd)  { border-right:  1px solid #2b5a39; }
-        .toggle-btn:nth-child(-n+2) { border-bottom: 1px solid #2b5a39; }
+        .toggle-btn:not(:last-child) { border-right: 1px solid #2b5a39; }
 
         .toggle-btn.active {
             background: #2b5a39;
@@ -73,26 +106,7 @@
         }
 
         .signoff-row.visible,
-        .bydate-row.visible,
-        .delivery-row.visible { display: block; }
-
-        input[type="date"] {
-            width: 100%;
-            padding: 0.5rem 0.6rem;
-            border: 1.5px solid #ccc;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            color: #1a1a1a;
-            background: white;
-            cursor: pointer;
-            transition: border-color 0.15s;
-        }
-
-        input[type="date"]:focus {
-            outline: none;
-            border-color: #2b5a39;
-            box-shadow: 0 0 0 2px rgba(43,90,57,0.15);
-        }
+        .bydate-row.visible { display: block; }
 
         .controls {
             display: flex;
@@ -129,6 +143,24 @@
         }
 
         select:focus {
+            outline: none;
+            border-color: #2b5a39;
+            box-shadow: 0 0 0 2px rgba(43,90,57,0.15);
+        }
+
+        input[type="date"] {
+            width: 100%;
+            padding: 0.5rem 0.6rem;
+            border: 1.5px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: #1a1a1a;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.15s;
+        }
+
+        input[type="date"]:focus {
             outline: none;
             border-color: #2b5a39;
             box-shadow: 0 0 0 2px rgba(43,90,57,0.15);
@@ -209,60 +241,99 @@
 <body>
 
 <header>
-    <h1>Longden Doors</h1>
-    <p>Lead Time Tool</p>
+    <div class="header-top">
+        <div>
+            <h1>Longden Doors</h1>
+            <p>Lead Time Tool</p>
+        </div>
+    </div>
+    <div class="header-tabs">
+        <button class="header-tab active" id="tabLead">Lead Time</button>
+        <button class="header-tab"        id="tabClient">Client Delivery Date</button>
+    </div>
 </header>
 
 <main>
-    <div class="toggle">
-        <button class="toggle-btn active" id="btnToday">From today</button>
-        <button class="toggle-btn"        id="btnSignOff">Sign off</button>
-        <button class="toggle-btn"        id="btnByDate">By date</button>
-        <button class="toggle-btn"        id="btnDelivery">Delivery date</button>
-    </div>
 
-    <div class="signoff-row" id="signoffRow">
-        <div class="control-group">
-            <label for="signOffWeek">Sign off in (weeks)</label>
-            <select id="signOffWeek"></select>
+    <!-- ── Page 1: Lead Time ── -->
+    <div id="pageLead" class="page active">
+
+        <div class="toggle">
+            <button class="toggle-btn active" id="btnToday">From today</button>
+            <button class="toggle-btn"        id="btnSignOff">Sign off</button>
+            <button class="toggle-btn"        id="btnByDate">By date</button>
         </div>
-    </div>
 
-    <div class="bydate-row" id="bydateRow">
-        <div class="control-group">
-            <label for="signOffDate">Sign off by</label>
-            <input type="date" id="signOffDate">
+        <div class="signoff-row" id="signoffRow">
+            <div class="control-group">
+                <label for="signOffWeek">Sign off in (weeks)</label>
+                <select id="signOffWeek"></select>
+            </div>
         </div>
+
+        <div class="bydate-row" id="bydateRow">
+            <div class="control-group">
+                <label for="signOffDate">Sign off by</label>
+                <input type="date" id="signOffDate">
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="lowWeek">Low week</label>
+                <select id="lowWeek"></select>
+            </div>
+            <div class="control-group">
+                <label for="highWeek">High week</label>
+                <select id="highWeek"></select>
+            </div>
+        </div>
+
+        <div class="error" id="error">High week must be &ge; low week.</div>
+
+        <div class="field-label">Generated sentence</div>
+        <div class="sentence-box" id="sentence"></div>
+        <div class="date-hint" id="dateHint"></div>
+
+        <div class="actions">
+            <button class="btn btn-primary" id="insertBtn">Insert into email</button>
+        </div>
+        <div class="status" id="status"></div>
+
     </div>
 
-    <div class="delivery-row" id="deliveryRow">
-        <div class="control-group">
+    <!-- ── Page 2: Client Delivery Date ── -->
+    <div id="pageClient" class="page">
+
+        <div class="control-group" style="margin-bottom:1rem">
             <label for="deliveryDate">Client's delivery date</label>
             <input type="date" id="deliveryDate">
         </div>
-    </div>
 
-    <div class="controls">
-        <div class="control-group">
-            <label for="lowWeek">Low week</label>
-            <select id="lowWeek"></select>
+        <div class="controls">
+            <div class="control-group">
+                <label for="delivLowWeek">Low week</label>
+                <select id="delivLowWeek"></select>
+            </div>
+            <div class="control-group">
+                <label for="delivHighWeek">High week</label>
+                <select id="delivHighWeek"></select>
+            </div>
         </div>
-        <div class="control-group">
-            <label for="highWeek">High week</label>
-            <select id="highWeek"></select>
+
+        <div class="error" id="delivError">High week must be &ge; low week.</div>
+
+        <div class="field-label">Generated sentence</div>
+        <div class="sentence-box" id="delivSentence"></div>
+        <div class="date-hint" id="delivDateHint"></div>
+
+        <div class="actions">
+            <button class="btn btn-primary" id="delivInsertBtn">Insert into email</button>
         </div>
+        <div class="status" id="delivStatus"></div>
+
     </div>
 
-    <div class="error" id="error">High week must be &ge; low week.</div>
-
-    <div class="field-label">Generated sentence</div>
-    <div class="sentence-box" id="sentence"></div>
-    <div class="date-hint" id="dateHint"></div>
-
-    <div class="actions">
-        <button class="btn btn-primary" id="insertBtn">Insert into email</button>
-    </div>
-    <div class="status" id="status"></div>
 </main>
 
 <script>
@@ -273,26 +344,40 @@
     const DEFAULT_SIGNOFF = 4;
     // ────────────────────────────────────────────────────
 
-    const btnToday        = document.getElementById('btnToday');
-    const btnSignOff      = document.getElementById('btnSignOff');
-    const btnByDate       = document.getElementById('btnByDate');
-    const btnDelivery     = document.getElementById('btnDelivery');
-    const signoffRow      = document.getElementById('signoffRow');
-    const bydateRow       = document.getElementById('bydateRow');
-    const deliveryRow     = document.getElementById('deliveryRow');
-    const signOffSel      = document.getElementById('signOffWeek');
-    const signOffDateInp  = document.getElementById('signOffDate');
+    // Lead Time page elements
+    const btnToday       = document.getElementById('btnToday');
+    const btnSignOff     = document.getElementById('btnSignOff');
+    const btnByDate      = document.getElementById('btnByDate');
+    const signoffRow     = document.getElementById('signoffRow');
+    const bydateRow      = document.getElementById('bydateRow');
+    const signOffSel     = document.getElementById('signOffWeek');
+    const signOffDateInp = document.getElementById('signOffDate');
+    const lowSel         = document.getElementById('lowWeek');
+    const highSel        = document.getElementById('highWeek');
+    const errorEl        = document.getElementById('error');
+    const sentenceEl     = document.getElementById('sentence');
+    const dateHintEl     = document.getElementById('dateHint');
+    const insertBtn      = document.getElementById('insertBtn');
+    const statusEl       = document.getElementById('status');
+
+    // Client Delivery page elements
     const deliveryDateInp = document.getElementById('deliveryDate');
-    const lowSel      = document.getElementById('lowWeek');
-    const highSel     = document.getElementById('highWeek');
-    const errorEl     = document.getElementById('error');
-    const sentenceEl  = document.getElementById('sentence');
-    const dateHintEl  = document.getElementById('dateHint');
-    const insertBtn   = document.getElementById('insertBtn');
-    const statusEl    = document.getElementById('status');
+    const delivLowSel     = document.getElementById('delivLowWeek');
+    const delivHighSel    = document.getElementById('delivHighWeek');
+    const delivErrorEl    = document.getElementById('delivError');
+    const delivSentenceEl = document.getElementById('delivSentence');
+    const delivDateHintEl = document.getElementById('delivDateHint');
+    const delivInsertBtn  = document.getElementById('delivInsertBtn');
+    const delivStatusEl   = document.getElementById('delivStatus');
+
+    // Header tabs
+    const tabLead    = document.getElementById('tabLead');
+    const tabClient  = document.getElementById('tabClient');
+    const pageLead   = document.getElementById('pageLead');
+    const pageClient = document.getElementById('pageClient');
 
     let officeReady = false;
-    let mode        = 'today'; // 'today' | 'signoff' | 'bydate' | 'delivery'
+    let mode        = 'today'; // 'today' | 'signoff' | 'bydate'
 
     // Populate sign-off dropdown (1–12)
     for (let i = 1; i <= 12; i++) {
@@ -304,22 +389,24 @@
     signOffSel.value = DEFAULT_SIGNOFF;
 
     // Set default dates to today
-    const _today = new Date();
-    const _todayStr = `${_today.getFullYear()}-${String(_today.getMonth()+1).padStart(2,'0')}-${String(_today.getDate()).padStart(2,'0')}`;
+    const _t = new Date();
+    const _todayStr = `${_t.getFullYear()}-${String(_t.getMonth()+1).padStart(2,'0')}-${String(_t.getDate()).padStart(2,'0')}`;
     signOffDateInp.value  = _todayStr;
     deliveryDateInp.value = _todayStr;
 
-    // Populate lead time dropdowns
+    // Populate week dropdowns
     WEEK_OPTIONS.forEach(w => {
-        [lowSel, highSel].forEach(sel => {
+        [lowSel, highSel, delivLowSel, delivHighSel].forEach(sel => {
             const opt = document.createElement('option');
             opt.value = w;
             opt.textContent = w;
             sel.appendChild(opt);
         });
     });
-    lowSel.value  = DEFAULT_LOW;
-    highSel.value = DEFAULT_HIGH;
+    lowSel.value       = DEFAULT_LOW;
+    highSel.value      = DEFAULT_HIGH;
+    delivLowSel.value  = DEFAULT_LOW;
+    delivHighSel.value = DEFAULT_HIGH;
 
     const MONTHS = ['January','February','March','April','May','June',
                     'July','August','September','October','November','December'];
@@ -335,6 +422,7 @@
         return includeYear ? `${s} ${date.getFullYear()}` : s;
     }
 
+    // ── Lead Time page ───────────────────────────────────
     function update() {
         const low     = parseInt(lowSel.value,     10);
         const high    = parseInt(highSel.value,    10);
@@ -379,7 +467,7 @@
 
             dateHintEl.textContent = `Low: ${fmt(dateLow, true)}  ·  High: ${fmt(dateHigh, true)}`;
 
-        } else if (mode === 'bydate') {
+        } else {
             if (!signOffDateInp.value) {
                 sentenceEl.textContent = '';
                 dateHintEl.textContent = '';
@@ -397,74 +485,117 @@
                        `${fmt(dateLow, diffYears)} to ${fmt(dateHigh, true)}.`;
 
             dateHintEl.textContent = `Low: ${fmt(dateLow, true)}  ·  High: ${fmt(dateHigh, true)}`;
-
-        } else {
-            if (!deliveryDateInp.value) {
-                sentenceEl.textContent = '';
-                dateHintEl.textContent = '';
-                insertBtn.disabled = true;
-                return;
-            }
-            const [dy, dm, dd] = deliveryDateInp.value.split('-').map(Number);
-            const delivDate    = new Date(dy, dm - 1, dd);
-            const orderByDate  = addDays(delivDate, -high * 7); // must order by (conservative)
-            const earliestDeliv = addDays(today, low  * 7);
-            const latestDeliv   = addDays(today, high * 7);
-            const diffYearsNow  = earliestDeliv.getFullYear() !== latestDeliv.getFullYear();
-
-            if (delivDate <= today) {
-                sentence = `Unfortunately, ${fmt(delivDate, true)} has already passed. With our current ` +
-                           `${low}–${high} week lead time, we can now deliver from around ` +
-                           `${fmt(earliestDeliv, diffYearsNow)} to ${fmt(latestDeliv, true)}.`;
-                dateHintEl.textContent = `Earliest: ${fmt(earliestDeliv, true)}  ·  Latest: ${fmt(latestDeliv, true)}`;
-            } else if (orderByDate < today) {
-                sentence = `Unfortunately, a delivery of ${fmt(delivDate, true)} is no longer achievable — ` +
-                           `to have met this date, an order would have needed to be placed by ${fmt(orderByDate, true)}. ` +
-                           `With our current ${low}–${high} week lead time, we can now deliver from around ` +
-                           `${fmt(earliestDeliv, diffYearsNow)} to ${fmt(latestDeliv, true)}.`;
-                dateHintEl.textContent = `Order was due: ${fmt(orderByDate, true)}  ·  Earliest now: ${fmt(earliestDeliv, true)}`;
-            } else {
-                sentence = `To achieve a delivery date of around ${fmt(delivDate, true)}, with our current ` +
-                           `${low}–${high} week lead time, you would need to place your order by ${fmt(orderByDate, true)}.`;
-                dateHintEl.textContent = `Order by: ${fmt(orderByDate, true)}`;
-            }
         }
 
         sentenceEl.textContent = sentence;
     }
 
-    // Mode toggle
     function setMode(newMode) {
         mode = newMode;
-        [btnToday, btnSignOff, btnByDate, btnDelivery].forEach(b => b.classList.remove('active'));
-        [signoffRow, bydateRow, deliveryRow].forEach(r => r.classList.remove('visible'));
-        if (newMode === 'today')    { btnToday.classList.add('active'); }
-        if (newMode === 'signoff')  { btnSignOff.classList.add('active');  signoffRow.classList.add('visible'); }
-        if (newMode === 'bydate')   { btnByDate.classList.add('active');   bydateRow.classList.add('visible'); }
-        if (newMode === 'delivery') { btnDelivery.classList.add('active'); deliveryRow.classList.add('visible'); }
+        [btnToday, btnSignOff, btnByDate].forEach(b => b.classList.remove('active'));
+        [signoffRow, bydateRow].forEach(r => r.classList.remove('visible'));
+        if (newMode === 'today')   { btnToday.classList.add('active'); }
+        if (newMode === 'signoff') { btnSignOff.classList.add('active'); signoffRow.classList.add('visible'); }
+        if (newMode === 'bydate')  { btnByDate.classList.add('active'); bydateRow.classList.add('visible'); }
         update();
     }
 
-    btnToday.addEventListener('click',    () => setMode('today'));
-    btnSignOff.addEventListener('click',  () => setMode('signoff'));
-    btnByDate.addEventListener('click',   () => setMode('bydate'));
-    btnDelivery.addEventListener('click', () => setMode('delivery'));
+    btnToday.addEventListener('click',   () => setMode('today'));
+    btnSignOff.addEventListener('click', () => setMode('signoff'));
+    btnByDate.addEventListener('click',  () => setMode('bydate'));
 
+    signOffSel.addEventListener('change',     update);
+    signOffDateInp.addEventListener('change', update);
+    lowSel.addEventListener('change',         update);
+    highSel.addEventListener('change',        update);
+
+    // ── Client Delivery page ─────────────────────────────
+    function delivUpdate() {
+        const low  = parseInt(delivLowSel.value,  10);
+        const high = parseInt(delivHighSel.value, 10);
+
+        if (high < low) {
+            delivErrorEl.classList.add('visible');
+            delivSentenceEl.textContent = '';
+            delivDateHintEl.textContent = '';
+            delivInsertBtn.disabled = true;
+            return;
+        }
+
+        delivErrorEl.classList.remove('visible');
+
+        if (!deliveryDateInp.value) {
+            delivSentenceEl.textContent = '';
+            delivDateHintEl.textContent = '';
+            delivInsertBtn.disabled = true;
+            return;
+        }
+
+        delivInsertBtn.disabled = false;
+
+        const [dy, dm, dd]  = deliveryDateInp.value.split('-').map(Number);
+        const delivDate     = new Date(dy, dm - 1, dd);
+        const today         = new Date(); today.setHours(0, 0, 0, 0);
+        const orderByDate   = addDays(delivDate, -high * 7);
+        const earliestDeliv = addDays(today, low  * 7);
+        const latestDeliv   = addDays(today, high * 7);
+        const diffYearsNow  = earliestDeliv.getFullYear() !== latestDeliv.getFullYear();
+
+        let sentence;
+
+        if (delivDate <= today) {
+            sentence = `Unfortunately, ${fmt(delivDate, true)} has already passed. With our current ` +
+                       `${low}–${high} week lead time, we can now deliver from around ` +
+                       `${fmt(earliestDeliv, diffYearsNow)} to ${fmt(latestDeliv, true)}.`;
+            delivDateHintEl.textContent = `Earliest: ${fmt(earliestDeliv, true)}  ·  Latest: ${fmt(latestDeliv, true)}`;
+        } else if (orderByDate < today) {
+            sentence = `Unfortunately, a delivery of ${fmt(delivDate, true)} is no longer achievable — ` +
+                       `to have met this date, an order would have needed to be placed by ${fmt(orderByDate, true)}. ` +
+                       `With our current ${low}–${high} week lead time, we can now deliver from around ` +
+                       `${fmt(earliestDeliv, diffYearsNow)} to ${fmt(latestDeliv, true)}.`;
+            delivDateHintEl.textContent = `Order was due: ${fmt(orderByDate, true)}  ·  Earliest now: ${fmt(earliestDeliv, true)}`;
+        } else {
+            sentence = `To achieve a delivery date of around ${fmt(delivDate, true)}, with our current ` +
+                       `${low}–${high} week lead time, you would need to place your order by ${fmt(orderByDate, true)}.`;
+            delivDateHintEl.textContent = `Order by: ${fmt(orderByDate, true)}`;
+        }
+
+        delivSentenceEl.textContent = sentence;
+    }
+
+    deliveryDateInp.addEventListener('change', delivUpdate);
+    delivLowSel.addEventListener('change',     delivUpdate);
+    delivHighSel.addEventListener('change',    delivUpdate);
+
+    // ── Header tab switching ─────────────────────────────
+    tabLead.addEventListener('click', () => {
+        tabLead.classList.add('active');
+        tabClient.classList.remove('active');
+        pageLead.classList.add('active');
+        pageClient.classList.remove('active');
+    });
+
+    tabClient.addEventListener('click', () => {
+        tabClient.classList.add('active');
+        tabLead.classList.remove('active');
+        pageClient.classList.add('active');
+        pageLead.classList.remove('active');
+        delivUpdate();
+    });
+
+    // ── Insert / shared helpers ──────────────────────────
     function flash(el, text, cssClass, duration) {
         const orig = el.textContent;
         const origClass = el.className;
         el.textContent = text;
         if (cssClass) el.classList.add(cssClass);
-        setTimeout(() => {
-            el.textContent = orig;
-            el.className = origClass;
-        }, duration || 1800);
+        setTimeout(() => { el.textContent = orig; el.className = origClass; }, duration || 1800);
     }
 
-    function showStatus(msg, isErr) {
-        statusEl.textContent = msg;
-        statusEl.className = 'status' + (isErr ? ' err' : '');
-        setTimeout(() => { statusEl.textContent = ''; statusEl.className = 'status'; }, 2500);
+    function showStatus(el, msg, isErr) {
+        el.textContent = msg;
+        el.className = 'status' + (isErr ? ' err' : '');
+        setTimeout(() => { el.textContent = ''; el.className = 'status'; }, 2500);
     }
 
     async function closePane() {
@@ -474,46 +605,40 @@
             } else {
                 window.close();
             }
-        } catch (e) {
-            window.close();
-        }
+        } catch (e) { window.close(); }
     }
 
-    insertBtn.addEventListener('click', () => {
-        const text = sentenceEl.textContent;
+    function insertText(text, btn, statEl) {
         if (!text) return;
-
         if (officeReady && Office.context && Office.context.mailbox) {
             Office.context.mailbox.item.body.setSelectedDataAsync(
                 text,
                 { coercionType: Office.CoercionType.Text },
                 result => {
                     if (result.status === Office.AsyncResultStatus.Succeeded) {
-                        flash(insertBtn, 'Inserted!', 'success');
+                        flash(btn, 'Inserted!', 'success');
                         setTimeout(closePane, 500);
                     } else {
-                        showStatus('Insert failed — try again.', true);
+                        showStatus(statEl, 'Insert failed — try again.', true);
                     }
                 }
             );
         } else {
             navigator.clipboard.writeText(text).then(() =>
-                showStatus('Copied (open via Outlook to insert directly).', false)
+                showStatus(statEl, 'Copied (open via Outlook to insert directly).', false)
             );
         }
-    });
+    }
 
-    signOffSel.addEventListener('change',      update);
-    signOffDateInp.addEventListener('change',  update);
-    deliveryDateInp.addEventListener('change', update);
-    lowSel.addEventListener('change',          update);
-    highSel.addEventListener('change',         update);
+    insertBtn.addEventListener('click',      () => insertText(sentenceEl.textContent,      insertBtn,      statusEl));
+    delivInsertBtn.addEventListener('click', () => insertText(delivSentenceEl.textContent, delivInsertBtn, delivStatusEl));
 
     if (typeof Office !== 'undefined') {
         Office.onReady(() => { officeReady = true; });
     }
 
     update();
+    delivUpdate();
 </script>
 
 </body>
