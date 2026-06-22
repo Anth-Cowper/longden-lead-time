@@ -51,6 +51,9 @@
 
     <Hosts>
       <Host xsi:type="MailHost">
+        <Runtimes>
+          <Runtime resid="TaskpaneRuntime" lifetime="short"/>
+        </Runtimes>
         <DesktopFormFactor>
           <FunctionFile resid="Commands.Url"/>
 
@@ -88,8 +91,9 @@
         <bt:Image id="Icon.80"  DefaultValue="https://anth-cowper.github.io/longden-lead-time/assets/icon-80.png"/>
       </bt:Images>
       <bt:Urls>
-        <bt:Url id="Commands.Url"  DefaultValue="https://anth-cowper.github.io/longden-lead-time/commands.html"/>
-        <bt:Url id="Taskpane.Url"  DefaultValue="https://anth-cowper.github.io/longden-lead-time/taskpane.html"/>
+        <bt:Url id="Commands.Url"      DefaultValue="https://anth-cowper.github.io/longden-lead-time/commands.html"/>
+        <bt:Url id="Taskpane.Url"      DefaultValue="https://anth-cowper.github.io/longden-lead-time/taskpane.html"/>
+        <bt:Url id="TaskpaneRuntime"   DefaultValue="https://anth-cowper.github.io/longden-lead-time/taskpane.html"/>
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="GroupLabel"    DefaultValue="Longden Doors"/>
