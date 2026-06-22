@@ -35,9 +35,10 @@
 
         main { padding: 1.1rem; }
 
-        /* Mode toggle */
+        /* Mode toggle — 2×2 grid */
         .toggle {
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             border: 1.5px solid #2b5a39;
             border-radius: 5px;
             overflow: hidden;
@@ -45,7 +46,6 @@
         }
 
         .toggle-btn {
-            flex: 1;
             padding: 0.45rem 0.5rem;
             font-size: 0.78rem;
             font-weight: 600;
@@ -57,7 +57,8 @@
             transition: background 0.15s, color 0.15s;
         }
 
-        .toggle-btn:not(:last-child) { border-right: 1px solid #2b5a39; }
+        .toggle-btn:nth-child(odd)  { border-right:  1px solid #2b5a39; }
+        .toggle-btn:nth-child(-n+2) { border-bottom: 1px solid #2b5a39; }
 
         .toggle-btn.active {
             background: #2b5a39;
@@ -72,7 +73,8 @@
         }
 
         .signoff-row.visible,
-        .bydate-row.visible { display: block; }
+        .bydate-row.visible,
+        .delivery-row.visible { display: block; }
 
         input[type="date"] {
             width: 100%;
@@ -216,6 +218,7 @@
         <button class="toggle-btn active" id="btnToday">From today</button>
         <button class="toggle-btn"        id="btnSignOff">Sign off</button>
         <button class="toggle-btn"        id="btnByDate">By date</button>
+        <button class="toggle-btn"        id="btnDelivery">Delivery date</button>
     </div>
 
     <div class="signoff-row" id="signoffRow">
@@ -229,6 +232,13 @@
         <div class="control-group">
             <label for="signOffDate">Sign off by</label>
             <input type="date" id="signOffDate">
+        </div>
+    </div>
+
+    <div class="delivery-row" id="deliveryRow">
+        <div class="control-group">
+            <label for="deliveryDate">Client's delivery date</label>
+            <input type="date" id="deliveryDate">
         </div>
     </div>
 
@@ -263,13 +273,16 @@
     const DEFAULT_SIGNOFF = 4;
     // ────────────────────────────────────────────────────
 
-    const btnToday       = document.getElementById('btnToday');
-    const btnSignOff     = document.getElementById('btnSignOff');
-    const btnByDate      = document.getElementById('btnByDate');
-    const signoffRow     = document.getElementById('signoffRow');
-    const bydateRow      = document.getElementById('bydateRow');
-    const signOffSel     = document.getElementById('signOffWeek');
-    const signOffDateInp = document.getElementById('signOffDate');
+    const btnToday        = document.getElementById('btnToday');
+    const btnSignOff      = document.getElementById('btnSignOff');
+    const btnByDate       = document.getElementById('btnByDate');
+    const btnDelivery     = document.getElementById('btnDelivery');
+    const signoffRow      = document.getElementById('signoffRow');
+    const bydateRow       = document.getElementById('bydateRow');
+    const deliveryRow     = document.getElementById('deliveryRow');
+    const signOffSel      = document.getElementById('signOffWeek');
+    const signOffDateInp  = document.getElementById('signOffDate');
+    const deliveryDateInp = document.getElementById('deliveryDate');
     const lowSel      = document.getElementById('lowWeek');
     const highSel     = document.getElementById('highWeek');
     const errorEl     = document.getElementById('error');
@@ -279,7 +292,7 @@
     const statusEl    = document.getElementById('status');
 
     let officeReady = false;
-    let mode        = 'today'; // 'today' | 'signoff' | 'bydate'
+    let mode        = 'today'; // 'today' | 'signoff' | 'bydate' | 'delivery'
 
     // Populate sign-off dropdown (1–12)
     for (let i = 1; i <= 12; i++) {
@@ -290,9 +303,11 @@
     }
     signOffSel.value = DEFAULT_SIGNOFF;
 
-    // Set default date to today
+    // Set default dates to today
     const _today = new Date();
-    signOffDateInp.value = `${_today.getFullYear()}-${String(_today.getMonth()+1).padStart(2,'0')}-${String(_today.getDate()).padStart(2,'0')}`;
+    const _todayStr = `${_today.getFullYear()}-${String(_today.getMonth()+1).padStart(2,'0')}-${String(_today.getDate()).padStart(2,'0')}`;
+    signOffDateInp.value  = _todayStr;
+    deliveryDateInp.value = _todayStr;
 
     // Populate lead time dropdowns
     WEEK_OPTIONS.forEach(w => {
@@ -364,7 +379,7 @@
 
             dateHintEl.textContent = `Low: ${fmt(dateLow, true)}  ·  High: ${fmt(dateHigh, true)}`;
 
-        } else {
+        } else if (mode === 'bydate') {
             if (!signOffDateInp.value) {
                 sentenceEl.textContent = '';
                 dateHintEl.textContent = '';
@@ -382,41 +397,58 @@
                        `${fmt(dateLow, diffYears)} to ${fmt(dateHigh, true)}.`;
 
             dateHintEl.textContent = `Low: ${fmt(dateLow, true)}  ·  High: ${fmt(dateHigh, true)}`;
+
+        } else {
+            if (!deliveryDateInp.value) {
+                sentenceEl.textContent = '';
+                dateHintEl.textContent = '';
+                insertBtn.disabled = true;
+                return;
+            }
+            const [dy, dm, dd] = deliveryDateInp.value.split('-').map(Number);
+            const delivDate    = new Date(dy, dm - 1, dd);
+            const orderByDate  = addDays(delivDate, -high * 7); // must order by (conservative)
+            const earliestDeliv = addDays(today, low  * 7);
+            const latestDeliv   = addDays(today, high * 7);
+            const diffYearsNow  = earliestDeliv.getFullYear() !== latestDeliv.getFullYear();
+
+            if (delivDate <= today) {
+                sentence = `Unfortunately, ${fmt(delivDate, true)} has already passed. With our current ` +
+                           `${low}–${high} week lead time, we can now deliver from around ` +
+                           `${fmt(earliestDeliv, diffYearsNow)} to ${fmt(latestDeliv, true)}.`;
+                dateHintEl.textContent = `Earliest: ${fmt(earliestDeliv, true)}  ·  Latest: ${fmt(latestDeliv, true)}`;
+            } else if (orderByDate < today) {
+                sentence = `Unfortunately, a delivery of ${fmt(delivDate, true)} is no longer achievable — ` +
+                           `to have met this date, an order would have needed to be placed by ${fmt(orderByDate, true)}. ` +
+                           `With our current ${low}–${high} week lead time, we can now deliver from around ` +
+                           `${fmt(earliestDeliv, diffYearsNow)} to ${fmt(latestDeliv, true)}.`;
+                dateHintEl.textContent = `Order was due: ${fmt(orderByDate, true)}  ·  Earliest now: ${fmt(earliestDeliv, true)}`;
+            } else {
+                sentence = `To achieve a delivery date of around ${fmt(delivDate, true)}, with our current ` +
+                           `${low}–${high} week lead time, you would need to place your order by ${fmt(orderByDate, true)}.`;
+                dateHintEl.textContent = `Order by: ${fmt(orderByDate, true)}`;
+            }
         }
 
         sentenceEl.textContent = sentence;
     }
 
     // Mode toggle
-    btnToday.addEventListener('click', () => {
-        mode = 'today';
-        btnToday.classList.add('active');
-        btnSignOff.classList.remove('active');
-        btnByDate.classList.remove('active');
-        signoffRow.classList.remove('visible');
-        bydateRow.classList.remove('visible');
+    function setMode(newMode) {
+        mode = newMode;
+        [btnToday, btnSignOff, btnByDate, btnDelivery].forEach(b => b.classList.remove('active'));
+        [signoffRow, bydateRow, deliveryRow].forEach(r => r.classList.remove('visible'));
+        if (newMode === 'today')    { btnToday.classList.add('active'); }
+        if (newMode === 'signoff')  { btnSignOff.classList.add('active');  signoffRow.classList.add('visible'); }
+        if (newMode === 'bydate')   { btnByDate.classList.add('active');   bydateRow.classList.add('visible'); }
+        if (newMode === 'delivery') { btnDelivery.classList.add('active'); deliveryRow.classList.add('visible'); }
         update();
-    });
+    }
 
-    btnSignOff.addEventListener('click', () => {
-        mode = 'signoff';
-        btnSignOff.classList.add('active');
-        btnToday.classList.remove('active');
-        btnByDate.classList.remove('active');
-        signoffRow.classList.add('visible');
-        bydateRow.classList.remove('visible');
-        update();
-    });
-
-    btnByDate.addEventListener('click', () => {
-        mode = 'bydate';
-        btnByDate.classList.add('active');
-        btnToday.classList.remove('active');
-        btnSignOff.classList.remove('active');
-        bydateRow.classList.add('visible');
-        signoffRow.classList.remove('visible');
-        update();
-    });
+    btnToday.addEventListener('click',    () => setMode('today'));
+    btnSignOff.addEventListener('click',  () => setMode('signoff'));
+    btnByDate.addEventListener('click',   () => setMode('bydate'));
+    btnDelivery.addEventListener('click', () => setMode('delivery'));
 
     function flash(el, text, cssClass, duration) {
         const orig = el.textContent;
@@ -471,10 +503,11 @@
         }
     });
 
-    signOffSel.addEventListener('change',     update);
-    signOffDateInp.addEventListener('change', update);
-    lowSel.addEventListener('change',         update);
-    highSel.addEventListener('change',        update);
+    signOffSel.addEventListener('change',      update);
+    signOffDateInp.addEventListener('change',  update);
+    deliveryDateInp.addEventListener('change', update);
+    lowSel.addEventListener('change',          update);
+    highSel.addEventListener('change',         update);
 
     if (typeof Office !== 'undefined') {
         Office.onReady(() => { officeReady = true; });
