@@ -7,7 +7,7 @@
   <Id>3d7f4a2e-c8b1-4d5e-9f6a-7b0c1d2e3f4a</Id>
   <Version>1.0.0.0</Version>
   <ProviderName>Longden Doors</ProviderName>
-  <DefaultLocale>en-GB</DefaultLocale>
+  <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Lead Time Tool"/>
   <Description DefaultValue="Generate a lead time sentence for sales emails with one click."/>
   <IconUrl DefaultValue="https://anth-cowper.github.io/longden-lead-time/assets/icon-64.png"/>
@@ -32,7 +32,6 @@
     <Form xsi:type="ItemEdit">
       <DesktopSettings>
         <SourceLocation DefaultValue="https://anth-cowper.github.io/longden-lead-time/taskpane.html"/>
-        <RequestedHeight>550</RequestedHeight>
       </DesktopSettings>
     </Form>
   </FormSettings>
