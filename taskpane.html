@@ -138,6 +138,9 @@
         .btn-primary:hover:not(:disabled) { background: #224830; }
         .btn-primary.success { background: #16a34a; }
 
+        .btn-close { background: white; color: #555; border: 1.5px solid #ccc; }
+        .btn-close:hover { background: #f5f5f5; }
+
         .status {
             margin-top: 0.6rem;
             font-size: 0.75rem;
@@ -174,8 +177,9 @@
     <div class="sentence-box" id="sentence"></div>
     <div class="date-hint" id="dateHint"></div>
 
-    <div class="actions">
+    <div class="actions" style="gap:0.6rem">
         <button class="btn btn-primary" id="insertBtn">Insert into email</button>
+        <button class="btn btn-close"   id="closeBtn">Close</button>
     </div>
     <div class="status" id="status"></div>
 </main>
@@ -193,6 +197,7 @@
     const sentenceEl = document.getElementById('sentence');
     const dateHintEl = document.getElementById('dateHint');
     const insertBtn  = document.getElementById('insertBtn');
+    const closeBtn   = document.getElementById('closeBtn');
     const statusEl   = document.getElementById('status');
 
     let officeReady = false;
@@ -291,9 +296,8 @@
                 result => {
                     if (result.status === Office.AsyncResultStatus.Succeeded) {
                         flash(insertBtn, 'Inserted!', 'success');
-                        setTimeout(closePane, 500);
                     } else {
-                        showStatus('Insert failed — use Copy instead.', true);
+                        showStatus('Insert failed — try again.', true);
                     }
                 }
             );
@@ -303,6 +307,8 @@
             );
         }
     });
+
+    closeBtn.addEventListener('click', closePane);
 
     lowSel.addEventListener('change',  update);
     highSel.addEventListener('change', update);
