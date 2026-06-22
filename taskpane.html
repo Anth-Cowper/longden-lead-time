@@ -57,20 +57,40 @@
             transition: background 0.15s, color 0.15s;
         }
 
-        .toggle-btn:first-child { border-right: 1px solid #2b5a39; }
+        .toggle-btn:not(:last-child) { border-right: 1px solid #2b5a39; }
 
         .toggle-btn.active {
             background: #2b5a39;
             color: white;
         }
 
-        /* Sign-off row */
-        .signoff-row {
+        /* Sign-off / by-date rows */
+        .signoff-row,
+        .bydate-row {
             margin-bottom: 1rem;
             display: none;
         }
 
-        .signoff-row.visible { display: block; }
+        .signoff-row.visible,
+        .bydate-row.visible { display: block; }
+
+        input[type="date"] {
+            width: 100%;
+            padding: 0.5rem 0.6rem;
+            border: 1.5px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: #1a1a1a;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.15s;
+        }
+
+        input[type="date"]:focus {
+            outline: none;
+            border-color: #2b5a39;
+            box-shadow: 0 0 0 2px rgba(43,90,57,0.15);
+        }
 
         .controls {
             display: flex;
@@ -195,12 +215,20 @@
     <div class="toggle">
         <button class="toggle-btn active" id="btnToday">From today</button>
         <button class="toggle-btn"        id="btnSignOff">Sign off</button>
+        <button class="toggle-btn"        id="btnByDate">By date</button>
     </div>
 
     <div class="signoff-row" id="signoffRow">
         <div class="control-group">
             <label for="signOffWeek">Sign off in (weeks)</label>
             <select id="signOffWeek"></select>
+        </div>
+    </div>
+
+    <div class="bydate-row" id="bydateRow">
+        <div class="control-group">
+            <label for="signOffDate">Sign off by</label>
+            <input type="date" id="signOffDate">
         </div>
     </div>
 
@@ -235,10 +263,13 @@
     const DEFAULT_SIGNOFF = 4;
     // ────────────────────────────────────────────────────
 
-    const btnToday    = document.getElementById('btnToday');
-    const btnSignOff  = document.getElementById('btnSignOff');
-    const signoffRow  = document.getElementById('signoffRow');
-    const signOffSel  = document.getElementById('signOffWeek');
+    const btnToday       = document.getElementById('btnToday');
+    const btnSignOff     = document.getElementById('btnSignOff');
+    const btnByDate      = document.getElementById('btnByDate');
+    const signoffRow     = document.getElementById('signoffRow');
+    const bydateRow      = document.getElementById('bydateRow');
+    const signOffSel     = document.getElementById('signOffWeek');
+    const signOffDateInp = document.getElementById('signOffDate');
     const lowSel      = document.getElementById('lowWeek');
     const highSel     = document.getElementById('highWeek');
     const errorEl     = document.getElementById('error');
@@ -248,7 +279,7 @@
     const statusEl    = document.getElementById('status');
 
     let officeReady = false;
-    let mode        = 'today'; // 'today' | 'signoff'
+    let mode        = 'today'; // 'today' | 'signoff' | 'bydate'
 
     // Populate sign-off dropdown (1–12)
     for (let i = 1; i <= 12; i++) {
@@ -258,6 +289,10 @@
         signOffSel.appendChild(opt);
     }
     signOffSel.value = DEFAULT_SIGNOFF;
+
+    // Set default date to today
+    const _today = new Date();
+    signOffDateInp.value = `${_today.getFullYear()}-${String(_today.getMonth()+1).padStart(2,'0')}-${String(_today.getDate()).padStart(2,'0')}`;
 
     // Populate lead time dropdowns
     WEEK_OPTIONS.forEach(w => {
@@ -316,7 +351,7 @@
 
             dateHintEl.textContent = `Low: ${fmt(dateLow, true)}  ·  High: ${fmt(dateHigh, true)}`;
 
-        } else {
+        } else if (mode === 'signoff') {
             const offset    = signOff * 7;
             const dateLow   = addDays(today, offset + low  * 7);
             const dateHigh  = addDays(today, offset + high * 7);
@@ -324,6 +359,25 @@
             const weekWord  = signOff === 1 ? 'week' : 'weeks';
 
             sentence = `As a guide, if you are able to sign off within ${signOff} ${weekWord}, we would then be ` +
+                       `running on a ${low}–${high} week lead time, which would put your delivery at around ` +
+                       `${fmt(dateLow, diffYears)} to ${fmt(dateHigh, true)}.`;
+
+            dateHintEl.textContent = `Low: ${fmt(dateLow, true)}  ·  High: ${fmt(dateHigh, true)}`;
+
+        } else {
+            if (!signOffDateInp.value) {
+                sentenceEl.textContent = '';
+                dateHintEl.textContent = '';
+                insertBtn.disabled = true;
+                return;
+            }
+            const [y, m, d]  = signOffDateInp.value.split('-').map(Number);
+            const signOffDate = new Date(y, m - 1, d);
+            const dateLow     = addDays(signOffDate, low  * 7);
+            const dateHigh    = addDays(signOffDate, high * 7);
+            const diffYears   = dateLow.getFullYear() !== dateHigh.getFullYear();
+
+            sentence = `As a guide, if you are able to sign off by ${fmt(signOffDate, true)}, we would then be ` +
                        `running on a ${low}–${high} week lead time, which would put your delivery at around ` +
                        `${fmt(dateLow, diffYears)} to ${fmt(dateHigh, true)}.`;
 
@@ -338,7 +392,9 @@
         mode = 'today';
         btnToday.classList.add('active');
         btnSignOff.classList.remove('active');
+        btnByDate.classList.remove('active');
         signoffRow.classList.remove('visible');
+        bydateRow.classList.remove('visible');
         update();
     });
 
@@ -346,7 +402,19 @@
         mode = 'signoff';
         btnSignOff.classList.add('active');
         btnToday.classList.remove('active');
+        btnByDate.classList.remove('active');
         signoffRow.classList.add('visible');
+        bydateRow.classList.remove('visible');
+        update();
+    });
+
+    btnByDate.addEventListener('click', () => {
+        mode = 'bydate';
+        btnByDate.classList.add('active');
+        btnToday.classList.remove('active');
+        btnSignOff.classList.remove('active');
+        bydateRow.classList.add('visible');
+        signoffRow.classList.remove('visible');
         update();
     });
 
@@ -403,9 +471,10 @@
         }
     });
 
-    signOffSel.addEventListener('change', update);
-    lowSel.addEventListener('change',     update);
-    highSel.addEventListener('change',    update);
+    signOffSel.addEventListener('change',     update);
+    signOffDateInp.addEventListener('change', update);
+    lowSel.addEventListener('change',         update);
+    highSel.addEventListener('change',        update);
 
     if (typeof Office !== 'undefined') {
         Office.onReady(() => { officeReady = true; });
