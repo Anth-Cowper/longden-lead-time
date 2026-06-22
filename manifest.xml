@@ -5,7 +5,7 @@
            xsi:type="MailApp">
 
   <Id>3d7f4a2e-c8b1-4d5e-9f6a-7b0c1d2e3f4a</Id>
-  <Version>1.0.0.0</Version>
+  <Version>1.0.0.1</Version>
   <ProviderName>Longden Doors</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Lead Time Tool"/>
@@ -42,6 +42,7 @@
     <Rule xsi:type="ItemIs" ItemType="Message" FormType="Edit"/>
   </Rule>
 
+  <!-- V1_0: used by clients that don't support V1_1 -->
   <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides" xsi:type="VersionOverridesV1_0">
     <Requirements>
       <bt:Sets>
@@ -53,7 +54,6 @@
       <Host xsi:type="MailHost">
         <DesktopFormFactor>
           <FunctionFile resid="Commands.Url"/>
-
           <ExtensionPoint xsi:type="MessageComposeCommandSurface">
             <OfficeTab id="TabDefault">
               <Group id="msgComposeGroup">
@@ -65,9 +65,9 @@
                     <Description resid="ButtonTooltip"/>
                   </Supertip>
                   <Icon>
-                    <bt:Image size="16"  resid="Icon.16"/>
-                    <bt:Image size="32"  resid="Icon.32"/>
-                    <bt:Image size="80"  resid="Icon.80"/>
+                    <bt:Image size="16" resid="Icon.16"/>
+                    <bt:Image size="32" resid="Icon.32"/>
+                    <bt:Image size="80" resid="Icon.80"/>
                   </Icon>
                   <Action xsi:type="ShowTaskpane">
                     <SourceLocation resid="Taskpane.Url"/>
@@ -76,20 +76,19 @@
               </Group>
             </OfficeTab>
           </ExtensionPoint>
-
         </DesktopFormFactor>
       </Host>
     </Hosts>
 
     <Resources>
       <bt:Images>
-        <bt:Image id="Icon.16"  DefaultValue="https://anth-cowper.github.io/longden-lead-time/assets/icon-16.png"/>
-        <bt:Image id="Icon.32"  DefaultValue="https://anth-cowper.github.io/longden-lead-time/assets/icon-32.png"/>
-        <bt:Image id="Icon.80"  DefaultValue="https://anth-cowper.github.io/longden-lead-time/assets/icon-80.png"/>
+        <bt:Image id="Icon.16" DefaultValue="https://anth-cowper.github.io/longden-lead-time/assets/icon-16.png"/>
+        <bt:Image id="Icon.32" DefaultValue="https://anth-cowper.github.io/longden-lead-time/assets/icon-32.png"/>
+        <bt:Image id="Icon.80" DefaultValue="https://anth-cowper.github.io/longden-lead-time/assets/icon-80.png"/>
       </bt:Images>
       <bt:Urls>
-        <bt:Url id="Commands.Url"  DefaultValue="https://anth-cowper.github.io/longden-lead-time/commands.html"/>
-        <bt:Url id="Taskpane.Url"  DefaultValue="https://anth-cowper.github.io/longden-lead-time/taskpane.html"/>
+        <bt:Url id="Commands.Url" DefaultValue="https://anth-cowper.github.io/longden-lead-time/commands.html"/>
+        <bt:Url id="Taskpane.Url" DefaultValue="https://anth-cowper.github.io/longden-lead-time/taskpane.html"/>
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="GroupLabel"    DefaultValue="Longden Doors"/>
@@ -100,5 +99,67 @@
       </bt:LongStrings>
     </Resources>
 
+    <!-- V1_1: used by modern Outlook — adds shared runtime to enable Office.addin.hide() -->
+    <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides/1.1" xsi:type="VersionOverridesV1_1">
+      <Requirements>
+        <bt:Sets>
+          <bt:Set Name="Mailbox" MinVersion="1.3"/>
+        </bt:Sets>
+      </Requirements>
+
+      <Hosts>
+        <Host xsi:type="MailHost">
+          <Runtimes>
+            <Runtime resid="TaskpaneRuntime" lifetime="short"/>
+          </Runtimes>
+          <DesktopFormFactor>
+            <FunctionFile resid="Commands.Url"/>
+            <ExtensionPoint xsi:type="MessageComposeCommandSurface">
+              <OfficeTab id="TabDefault">
+                <Group id="msgComposeGroup">
+                  <Label resid="GroupLabel"/>
+                  <Control xsi:type="Button" id="msgComposeOpenPaneButton">
+                    <Label resid="ButtonLabel"/>
+                    <Supertip>
+                      <Title resid="ButtonLabel"/>
+                      <Description resid="ButtonTooltip"/>
+                    </Supertip>
+                    <Icon>
+                      <bt:Image size="16" resid="Icon.16"/>
+                      <bt:Image size="32" resid="Icon.32"/>
+                      <bt:Image size="80" resid="Icon.80"/>
+                    </Icon>
+                    <Action xsi:type="ShowTaskpane">
+                      <SourceLocation resid="Taskpane.Url"/>
+                    </Action>
+                  </Control>
+                </Group>
+              </OfficeTab>
+            </ExtensionPoint>
+          </DesktopFormFactor>
+        </Host>
+      </Hosts>
+
+      <Resources>
+        <bt:Images>
+          <bt:Image id="Icon.16" DefaultValue="https://anth-cowper.github.io/longden-lead-time/assets/icon-16.png"/>
+          <bt:Image id="Icon.32" DefaultValue="https://anth-cowper.github.io/longden-lead-time/assets/icon-32.png"/>
+          <bt:Image id="Icon.80" DefaultValue="https://anth-cowper.github.io/longden-lead-time/assets/icon-80.png"/>
+        </bt:Images>
+        <bt:Urls>
+          <bt:Url id="Commands.Url"    DefaultValue="https://anth-cowper.github.io/longden-lead-time/commands.html"/>
+          <bt:Url id="Taskpane.Url"    DefaultValue="https://anth-cowper.github.io/longden-lead-time/taskpane.html"/>
+          <bt:Url id="TaskpaneRuntime" DefaultValue="https://anth-cowper.github.io/longden-lead-time/taskpane.html"/>
+        </bt:Urls>
+        <bt:ShortStrings>
+          <bt:String id="GroupLabel"    DefaultValue="Longden Doors"/>
+          <bt:String id="ButtonLabel"   DefaultValue="Lead Time"/>
+        </bt:ShortStrings>
+        <bt:LongStrings>
+          <bt:String id="ButtonTooltip" DefaultValue="Generate a lead time sentence for this email"/>
+        </bt:LongStrings>
+      </Resources>
+
+    </VersionOverrides>
   </VersionOverrides>
 </OfficeApp>
