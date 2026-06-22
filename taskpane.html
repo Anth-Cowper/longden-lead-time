@@ -550,14 +550,14 @@
             delivDateHintEl.textContent = `Earliest: ${fmt(earliestDeliv, true)}  ·  Latest: ${fmt(latestDeliv, true)}`;
         } else if (orderByDate < today) {
             sentence = `Unfortunately, a delivery of ${fmt(delivDate, true)} is no longer achievable — ` +
-                       `to have met this date, an order would have needed to be placed by ${fmt(orderByDate, true)}. ` +
+                       `to have met this date, you would have needed to sign off by ${fmt(orderByDate, true)}. ` +
                        `With our current ${low}–${high} week lead time, we can now deliver from around ` +
                        `${fmt(earliestDeliv, diffYearsNow)} to ${fmt(latestDeliv, true)}.`;
-            delivDateHintEl.textContent = `Order was due: ${fmt(orderByDate, true)}  ·  Earliest now: ${fmt(earliestDeliv, true)}`;
+            delivDateHintEl.textContent = `Sign-off was due: ${fmt(orderByDate, true)}  ·  Earliest now: ${fmt(earliestDeliv, true)}`;
         } else {
             sentence = `To achieve a delivery date of around ${fmt(delivDate, true)}, with our current ` +
-                       `${low}–${high} week lead time, you would need to place your order by ${fmt(orderByDate, true)}.`;
-            delivDateHintEl.textContent = `Order by: ${fmt(orderByDate, true)}`;
+                       `${low}–${high} week lead time, you would need to sign off by ${fmt(orderByDate, true)}.`;
+            delivDateHintEl.textContent = `Sign off by: ${fmt(orderByDate, true)}`;
         }
 
         delivSentenceEl.textContent = sentence;
