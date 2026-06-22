@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead Time Tool — Longden Doors</title>
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f0ec;
+            min-height: 100vh;
+        }
+
+        header {
+            background: #2b5a39;
+            color: white;
+            padding: 0.9rem 1.1rem;
+        }
+
+        header h1 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        header p {
+            font-size: 0.72rem;
+            opacity: 0.7;
+            margin-top: 0.1rem;
+        }
+
+        main { padding: 1.1rem; }
+
+        .controls {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .control-group { flex: 1; }
+
+        label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.3rem;
+        }
+
+        select {
+            width: 100%;
+            padding: 0.5rem 1.8rem 0.5rem 0.6rem;
+            border: 1.5px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: #1a1a1a;
+            background: white;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23666' d='M5 6L0 0h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.6rem center;
+            transition: border-color 0.15s;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #2b5a39;
+            box-shadow: 0 0 0 2px rgba(43,90,57,0.15);
+        }
+
+        .error {
+            font-size: 0.8rem;
+            color: #b91c1c;
+            background: #fef2f2;
+            border: 1px solid #fca5a5;
+            border-radius: 4px;
+            padding: 0.5rem 0.7rem;
+            margin-bottom: 0.9rem;
+            display: none;
+        }
+
+        .error.visible { display: block; }
+
+        .field-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.4rem;
+        }
+
+        .sentence-box {
+            background: white;
+            border: 1.5px solid #d4d4cc;
+            border-radius: 4px;
+            padding: 0.75rem 0.85rem;
+            font-size: 0.875rem;
+            line-height: 1.65;
+            color: #1a1a1a;
+            min-height: 80px;
+            margin-bottom: 0.4rem;
+            user-select: all;
+        }
+
+        .date-hint {
+            font-size: 0.72rem;
+            color: #888;
+            margin-bottom: 1rem;
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.6rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 0.6rem 0.75rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s;
+            border: none;
+        }
+
+        .btn:active { transform: scale(0.97); }
+        .btn:disabled { opacity: 0.4; cursor: default; transform: none; }
+
+        .btn-primary { background: #2b5a39; color: white; }
+        .btn-primary:hover:not(:disabled) { background: #224830; }
+        .btn-primary.success { background: #16a34a; }
+
+        .btn-secondary { background: white; color: #2b5a39; border: 1.5px solid #2b5a39; }
+        .btn-secondary:hover:not(:disabled) { background: #f0f7f2; }
+        .btn-secondary.success { background: #f0fdf4; border-color: #16a34a; color: #16a34a; }
+
+        .status {
+            margin-top: 0.6rem;
+            font-size: 0.75rem;
+            color: #16a34a;
+            min-height: 1rem;
+            text-align: center;
+        }
+
+        .status.err { color: #b91c1c; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Longden Doors</h1>
+    <p>Lead Time Tool</p>
+</header>
+
+<main>
+    <div class="controls">
+        <div class="control-group">
+            <label for="lowWeek">Low week</label>
+            <select id="lowWeek"></select>
+        </div>
+        <div class="control-group">
+            <label for="highWeek">High week</label>
+            <select id="highWeek"></select>
+        </div>
+    </div>
+
+    <div class="error" id="error">High week must be &ge; low week.</div>
+
+    <div class="field-label">Generated sentence</div>
+    <div class="sentence-box" id="sentence"></div>
+    <div class="date-hint" id="dateHint"></div>
+
+    <div class="actions">
+        <button class="btn btn-primary" id="insertBtn">Insert into email</button>
+        <button class="btn btn-secondary" id="copyBtn">Copy</button>
+    </div>
+    <div class="status" id="status"></div>
+</main>
+
+<script>
+    // ── Config ───────────────────────────────────────────
+    const WEEK_OPTIONS = [2, 4, 6, 8, 10, 12, 14, 16];
+    const DEFAULT_LOW  = 10;
+    const DEFAULT_HIGH = 12;
+    // ────────────────────────────────────────────────────
+
+    const lowSel     = document.getElementById('lowWeek');
+    const highSel    = document.getElementById('highWeek');
+    const errorEl    = document.getElementById('error');
+    const sentenceEl = document.getElementById('sentence');
+    const dateHintEl = document.getElementById('dateHint');
+    const insertBtn  = document.getElementById('insertBtn');
+    const copyBtn    = document.getElementById('copyBtn');
+    const statusEl   = document.getElementById('status');
+
+    let officeReady = false;
+
+    WEEK_OPTIONS.forEach(w => {
+        [lowSel, highSel].forEach(sel => {
+            const opt = document.createElement('option');
+            opt.value = w;
+            opt.textContent = w;
+            sel.appendChild(opt);
+        });
+    });
+    lowSel.value  = DEFAULT_LOW;
+    highSel.value = DEFAULT_HIGH;
+
+    const MONTHS = ['January','February','March','April','May','June',
+                    'July','August','September','October','November','December'];
+
+    function addDays(base, days) {
+        const d = new Date(base);
+        d.setDate(d.getDate() + days);
+        return d;
+    }
+
+    function fmt(date, includeYear) {
+        const s = `${date.getDate()} ${MONTHS[date.getMonth()]}`;
+        return includeYear ? `${s} ${date.getFullYear()}` : s;
+    }
+
+    function update() {
+        const low  = parseInt(lowSel.value,  10);
+        const high = parseInt(highSel.value, 10);
+
+        if (high < low) {
+            errorEl.classList.add('visible');
+            sentenceEl.textContent = '';
+            dateHintEl.textContent = '';
+            insertBtn.disabled = true;
+            copyBtn.disabled   = true;
+            return;
+        }
+
+        errorEl.classList.remove('visible');
+        insertBtn.disabled = false;
+        copyBtn.disabled   = false;
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const dateLow   = addDays(today, low  * 7);
+        const dateHigh  = addDays(today, high * 7);
+        const diffYears = dateLow.getFullYear() !== dateHigh.getFullYear();
+
+        sentenceEl.textContent =
+            `As a guide, orders placed today are currently running on a ${low}–${high} week ` +
+            `lead time, which would put your delivery at around ${fmt(dateLow, diffYears)} to ${fmt(dateHigh, true)}.`;
+
+        dateHintEl.textContent = `Low: ${fmt(dateLow, true)}  ·  High: ${fmt(dateHigh, true)}`;
+    }
+
+    function flash(el, text, cssClass, duration) {
+        const orig = el.textContent;
+        const origClass = el.className;
+        el.textContent = text;
+        if (cssClass) el.classList.add(cssClass);
+        setTimeout(() => {
+            el.textContent = orig;
+            el.className = origClass;
+        }, duration || 1800);
+    }
+
+    function showStatus(msg, isErr) {
+        statusEl.textContent = msg;
+        statusEl.className = 'status' + (isErr ? ' err' : '');
+        setTimeout(() => { statusEl.textContent = ''; statusEl.className = 'status'; }, 2500);
+    }
+
+    insertBtn.addEventListener('click', () => {
+        const text = sentenceEl.textContent;
+        if (!text) return;
+
+        if (officeReady && Office.context && Office.context.mailbox) {
+            Office.context.mailbox.item.body.setSelectedDataAsync(
+                text,
+                { coercionType: Office.CoercionType.Text },
+                result => {
+                    if (result.status === Office.AsyncResultStatus.Succeeded) {
+                        flash(insertBtn, 'Inserted!', 'success');
+                    } else {
+                        showStatus('Insert failed — use Copy instead.', true);
+                    }
+                }
+            );
+        } else {
+            navigator.clipboard.writeText(text).then(() =>
+                showStatus('Copied (open via Outlook to insert directly).', false)
+            );
+        }
+    });
+
+    copyBtn.addEventListener('click', () => {
+        const text = sentenceEl.textContent;
+        if (!text) return;
+        navigator.clipboard.writeText(text).then(() => flash(copyBtn, 'Copied!', 'success'));
+    });
+
+    lowSel.addEventListener('change',  update);
+    highSel.addEventListener('change', update);
+
+    if (typeof Office !== 'undefined') {
+        Office.onReady(() => { officeReady = true; });
+    }
+
+    update();
+</script>
+
+</body>
+</html>
