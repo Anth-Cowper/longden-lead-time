@@ -138,8 +138,6 @@
         .btn-primary:hover:not(:disabled) { background: #224830; }
         .btn-primary.success { background: #16a34a; }
 
-        .btn-close { background: white; color: #555; border: 1.5px solid #ccc; }
-        .btn-close:hover { background: #f5f5f5; }
 
         .status {
             margin-top: 0.6rem;
@@ -177,9 +175,8 @@
     <div class="sentence-box" id="sentence"></div>
     <div class="date-hint" id="dateHint"></div>
 
-    <div class="actions" style="gap:0.6rem">
+    <div class="actions">
         <button class="btn btn-primary" id="insertBtn">Insert into email</button>
-        <button class="btn btn-close"   id="closeBtn">Close</button>
     </div>
     <div class="status" id="status"></div>
 </main>
@@ -197,7 +194,6 @@
     const sentenceEl = document.getElementById('sentence');
     const dateHintEl = document.getElementById('dateHint');
     const insertBtn  = document.getElementById('insertBtn');
-    const closeBtn   = document.getElementById('closeBtn');
     const statusEl   = document.getElementById('status');
 
     let officeReady = false;
@@ -273,18 +269,6 @@
         setTimeout(() => { statusEl.textContent = ''; statusEl.className = 'status'; }, 2500);
     }
 
-    async function closePane() {
-        try {
-            if (Office.addin && typeof Office.addin.hide === 'function') {
-                await Office.addin.hide();
-            } else {
-                window.close();
-            }
-        } catch (e) {
-            window.close();
-        }
-    }
-
     insertBtn.addEventListener('click', () => {
         const text = sentenceEl.textContent;
         if (!text) return;
@@ -307,8 +291,6 @@
             );
         }
     });
-
-    closeBtn.addEventListener('click', closePane);
 
     lowSel.addEventListener('change',  update);
     highSel.addEventListener('change', update);
