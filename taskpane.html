@@ -35,6 +35,43 @@
 
         main { padding: 1.1rem; }
 
+        /* Mode toggle */
+        .toggle {
+            display: flex;
+            border: 1.5px solid #2b5a39;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 0.45rem 0.5rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: white;
+            color: #2b5a39;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .toggle-btn:first-child { border-right: 1px solid #2b5a39; }
+
+        .toggle-btn.active {
+            background: #2b5a39;
+            color: white;
+        }
+
+        /* Sign-off row */
+        .signoff-row {
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .signoff-row.visible { display: block; }
+
         .controls {
             display: flex;
             gap: 0.75rem;
@@ -116,9 +153,7 @@
             margin-bottom: 1rem;
         }
 
-        .actions {
-            display: flex;
-        }
+        .actions { display: flex; }
 
         .btn {
             flex: 1;
@@ -137,7 +172,6 @@
         .btn-primary { background: #2b5a39; color: white; }
         .btn-primary:hover:not(:disabled) { background: #224830; }
         .btn-primary.success { background: #16a34a; }
-
 
         .status {
             margin-top: 0.6rem;
@@ -158,6 +192,18 @@
 </header>
 
 <main>
+    <div class="toggle">
+        <button class="toggle-btn active" id="btnToday">From today</button>
+        <button class="toggle-btn"        id="btnSignOff">Sign off</button>
+    </div>
+
+    <div class="signoff-row" id="signoffRow">
+        <div class="control-group">
+            <label for="signOffWeek">Sign off in (weeks)</label>
+            <select id="signOffWeek"></select>
+        </div>
+    </div>
+
     <div class="controls">
         <div class="control-group">
             <label for="lowWeek">Low week</label>
@@ -183,21 +229,37 @@
 
 <script>
     // ── Config ───────────────────────────────────────────
-    const WEEK_OPTIONS = [2, 4, 6, 8, 10, 12, 14, 16];
-    const DEFAULT_LOW  = 10;
-    const DEFAULT_HIGH = 12;
+    const WEEK_OPTIONS    = [2, 4, 6, 8, 10, 12, 14, 16];
+    const DEFAULT_LOW     = 10;
+    const DEFAULT_HIGH    = 12;
+    const DEFAULT_SIGNOFF = 4;
     // ────────────────────────────────────────────────────
 
-    const lowSel     = document.getElementById('lowWeek');
-    const highSel    = document.getElementById('highWeek');
-    const errorEl    = document.getElementById('error');
-    const sentenceEl = document.getElementById('sentence');
-    const dateHintEl = document.getElementById('dateHint');
-    const insertBtn  = document.getElementById('insertBtn');
-    const statusEl   = document.getElementById('status');
+    const btnToday    = document.getElementById('btnToday');
+    const btnSignOff  = document.getElementById('btnSignOff');
+    const signoffRow  = document.getElementById('signoffRow');
+    const signOffSel  = document.getElementById('signOffWeek');
+    const lowSel      = document.getElementById('lowWeek');
+    const highSel     = document.getElementById('highWeek');
+    const errorEl     = document.getElementById('error');
+    const sentenceEl  = document.getElementById('sentence');
+    const dateHintEl  = document.getElementById('dateHint');
+    const insertBtn   = document.getElementById('insertBtn');
+    const statusEl    = document.getElementById('status');
 
     let officeReady = false;
+    let mode        = 'today'; // 'today' | 'signoff'
 
+    // Populate sign-off dropdown (1–12)
+    for (let i = 1; i <= 12; i++) {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = i;
+        signOffSel.appendChild(opt);
+    }
+    signOffSel.value = DEFAULT_SIGNOFF;
+
+    // Populate lead time dropdowns
     WEEK_OPTIONS.forEach(w => {
         [lowSel, highSel].forEach(sel => {
             const opt = document.createElement('option');
@@ -224,8 +286,9 @@
     }
 
     function update() {
-        const low  = parseInt(lowSel.value,  10);
-        const high = parseInt(highSel.value, 10);
+        const low     = parseInt(lowSel.value,     10);
+        const high    = parseInt(highSel.value,    10);
+        const signOff = parseInt(signOffSel.value, 10);
 
         if (high < low) {
             errorEl.classList.add('visible');
@@ -241,16 +304,51 @@
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        const dateLow   = addDays(today, low  * 7);
-        const dateHigh  = addDays(today, high * 7);
-        const diffYears = dateLow.getFullYear() !== dateHigh.getFullYear();
+        let sentence;
 
-        sentenceEl.textContent =
-            `As a guide, orders placed today are currently running on a ${low}–${high} week ` +
-            `lead time, which would put your delivery at around ${fmt(dateLow, diffYears)} to ${fmt(dateHigh, true)}.`;
+        if (mode === 'today') {
+            const dateLow   = addDays(today, low  * 7);
+            const dateHigh  = addDays(today, high * 7);
+            const diffYears = dateLow.getFullYear() !== dateHigh.getFullYear();
 
-        dateHintEl.textContent = `Low: ${fmt(dateLow, true)}  ·  High: ${fmt(dateHigh, true)}`;
+            sentence = `As a guide, orders placed today are currently running on a ${low}–${high} week ` +
+                       `lead time, which would put your delivery at around ${fmt(dateLow, diffYears)} to ${fmt(dateHigh, true)}.`;
+
+            dateHintEl.textContent = `Low: ${fmt(dateLow, true)}  ·  High: ${fmt(dateHigh, true)}`;
+
+        } else {
+            const offset    = signOff * 7;
+            const dateLow   = addDays(today, offset + low  * 7);
+            const dateHigh  = addDays(today, offset + high * 7);
+            const diffYears = dateLow.getFullYear() !== dateHigh.getFullYear();
+            const weekWord  = signOff === 1 ? 'week' : 'weeks';
+
+            sentence = `As a guide, if you are able to sign off within ${signOff} ${weekWord}, we would then be ` +
+                       `running on a ${low}–${high} week lead time, which would put your delivery at around ` +
+                       `${fmt(dateLow, diffYears)} to ${fmt(dateHigh, true)}.`;
+
+            dateHintEl.textContent = `Low: ${fmt(dateLow, true)}  ·  High: ${fmt(dateHigh, true)}`;
+        }
+
+        sentenceEl.textContent = sentence;
     }
+
+    // Mode toggle
+    btnToday.addEventListener('click', () => {
+        mode = 'today';
+        btnToday.classList.add('active');
+        btnSignOff.classList.remove('active');
+        signoffRow.classList.remove('visible');
+        update();
+    });
+
+    btnSignOff.addEventListener('click', () => {
+        mode = 'signoff';
+        btnSignOff.classList.add('active');
+        btnToday.classList.remove('active');
+        signoffRow.classList.add('visible');
+        update();
+    });
 
     function flash(el, text, cssClass, duration) {
         const orig = el.textContent;
@@ -305,8 +403,9 @@
         }
     });
 
-    lowSel.addEventListener('change',  update);
-    highSel.addEventListener('change', update);
+    signOffSel.addEventListener('change', update);
+    lowSel.addEventListener('change',     update);
+    highSel.addEventListener('change',    update);
 
     if (typeof Office !== 'undefined') {
         Office.onReady(() => { officeReady = true; });
