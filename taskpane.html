@@ -269,6 +269,18 @@
         setTimeout(() => { statusEl.textContent = ''; statusEl.className = 'status'; }, 2500);
     }
 
+    async function closePane() {
+        try {
+            if (Office.addin && typeof Office.addin.hide === 'function') {
+                await Office.addin.hide();
+            } else {
+                window.close();
+            }
+        } catch (e) {
+            window.close();
+        }
+    }
+
     insertBtn.addEventListener('click', () => {
         const text = sentenceEl.textContent;
         if (!text) return;
@@ -280,6 +292,7 @@
                 result => {
                     if (result.status === Office.AsyncResultStatus.Succeeded) {
                         flash(insertBtn, 'Inserted!', 'success');
+                        setTimeout(closePane, 500);
                     } else {
                         showStatus('Insert failed — try again.', true);
                     }
