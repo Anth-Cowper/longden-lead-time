@@ -8,17 +8,16 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-    --brand: #2b5a39;
-    --brand-dark: #1e3f28;
+    --brand:       #2b5a39;
+    --brand-dark:  #1e3f28;
     --brand-faint: #eef3f0;
-    --accent: #b07d3a;
-    --ground: #f2f0ec;
-    --surface: #ffffff;
-    --text: #1c1c19;
-    --muted: #6b6960;
-    --border: #ddd9d0;
-    --danger: #b91c1c;
-    --success: #16a34a;
+    --ground:      #f2f0ec;
+    --surface:     #ffffff;
+    --text:        #1c1c19;
+    --muted:       #6b6960;
+    --border:      #ddd9d0;
+    --success:     #16a34a;
+    --danger:      #b91c1c;
 }
 
 body {
@@ -64,92 +63,6 @@ body {
 .btn-publish:disabled { opacity: 0.45; cursor: default; }
 .btn-publish.success { background: #dcfce7; color: var(--success); }
 
-/* ── Token bar ── */
-.token-bar {
-    background: var(--brand-faint);
-    border-bottom: 1px solid #c9ddd0;
-    padding: 0.6rem 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-}
-
-.token-label {
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--brand);
-    white-space: nowrap;
-}
-
-.token-input-wrap {
-    position: relative;
-    flex: 1;
-    min-width: 200px;
-    max-width: 420px;
-}
-
-.token-input {
-    width: 100%;
-    padding: 0.4rem 2.2rem 0.4rem 0.6rem;
-    border: 1.5px solid #b5ccbb;
-    border-radius: 4px;
-    font-size: 0.82rem;
-    font-family: Consolas, monospace;
-    background: white;
-    color: var(--text);
-}
-
-.token-input:focus { outline: none; border-color: var(--brand); }
-
-.token-eye {
-    position: absolute;
-    right: 0.5rem;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 0.85rem;
-    color: var(--muted);
-    line-height: 1;
-    padding: 0.1rem;
-}
-
-.token-save {
-    padding: 0.4rem 0.85rem;
-    font-size: 0.78rem;
-    font-weight: 600;
-    background: var(--brand);
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.token-save:hover { background: var(--brand-dark); }
-
-.token-status {
-    font-size: 0.72rem;
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-    color: var(--muted);
-}
-
-.dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--muted);
-    flex-shrink: 0;
-}
-
-.dot.ok  { background: var(--success); }
-.dot.err { background: var(--danger); }
-
 /* ── Main content ── */
 main {
     max-width: 780px;
@@ -174,14 +87,9 @@ main {
     white-space: nowrap;
 }
 
-.section-rule {
-    flex: 1;
-    height: 1px;
-    background: var(--brand);
-    opacity: 0.2;
-}
+.section-rule { flex: 1; height: 1px; background: var(--brand); opacity: 0.2; }
 
-/* ── Template card ── */
+/* ── Template cards ── */
 .card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -200,16 +108,8 @@ main {
     border-bottom: 1px solid var(--border);
 }
 
-.card-name {
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--brand);
-}
-
+.card-name { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brand); }
 .card-when { font-size: 0.63rem; color: var(--muted); }
-
 .card-body { padding: 0.75rem 0.85rem 0.65rem; }
 
 textarea {
@@ -217,7 +117,7 @@ textarea {
     padding: 0.6rem 0.7rem;
     border: 1.5px solid var(--border);
     border-radius: 3px;
-    font-size: 0.875rem;
+    font-size: 0.9rem;
     line-height: 1.65;
     color: var(--text);
     background: #fdfdfc;
@@ -229,12 +129,7 @@ textarea {
 
 textarea:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 2px rgba(43,90,57,0.1); }
 
-.vars {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.3rem;
-    margin-top: 0.5rem;
-}
+.vars { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.5rem; }
 
 .var-chip {
     font-family: Consolas, 'Courier New', monospace;
@@ -244,12 +139,11 @@ textarea:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 2p
     border: 1px solid #c9ddd0;
     border-radius: 2px;
     color: var(--brand);
-    cursor: default;
     user-select: all;
 }
 
-/* ── Status bar ── */
-#globalStatus {
+/* ── Toast ── */
+#toast {
     position: fixed;
     bottom: 1.25rem;
     left: 50%;
@@ -267,14 +161,13 @@ textarea:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 2p
     white-space: nowrap;
 }
 
-#globalStatus.visible { opacity: 1; }
-#globalStatus.ok  { background: var(--success); }
-#globalStatus.err { background: var(--danger); }
+#toast.show      { opacity: 1; }
+#toast.ok        { background: var(--success); }
+#toast.err       { background: var(--danger); }
 </style>
 </head>
 <body>
 
-<!-- Top bar -->
 <div class="topbar">
     <div>
         <div class="topbar-title">Longden Doors</div>
@@ -283,21 +176,6 @@ textarea:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 2p
     <button class="btn-publish" id="publishBtn" onclick="publish()">Publish to live</button>
 </div>
 
-<!-- Token bar -->
-<div class="token-bar">
-    <span class="token-label">GitHub Token</span>
-    <div class="token-input-wrap">
-        <input class="token-input" type="password" id="tokenInput" placeholder="ghp_xxxxxxxxxxxx  (needs repo scope)">
-        <button class="token-eye" id="tokenEye" onclick="toggleTokenVisibility()" title="Show/hide">&#128065;</button>
-    </div>
-    <button class="token-save" onclick="saveToken()">Save</button>
-    <div class="token-status">
-        <div class="dot" id="statusDot"></div>
-        <span id="statusText">Add a token to enable publishing</span>
-    </div>
-</div>
-
-<!-- Main -->
 <main>
 
     <div class="section-head">
@@ -414,127 +292,70 @@ textarea:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 2p
 
 </main>
 
-<div id="globalStatus"></div>
+<div id="toast"></div>
 
 <script>
-    const REPO    = 'anth-cowper/longden-lead-time';
-    const FILE    = 'sentences.json';
-    const PAGES_URL = `https://anth-cowper.github.io/${REPO.split('/')[1]}/${FILE}`;
-    const API_URL   = `https://api.github.com/repos/${REPO}/contents/${FILE}`;
-    const KEYS      = ['fromToday','signOffWeeks','signOffByDate','clientAchievable','clientSignOffMissed','clientDatePassed'];
+    const KEYS = ['fromToday','signOffWeeks','signOffByDate','clientAchievable','clientSignOffMissed','clientDatePassed'];
 
-    // ── Token helpers ──────────────────────────────────
-    function getToken()    { return localStorage.getItem('gh_token') || ''; }
-    function storeToken(t) { localStorage.setItem('gh_token', t.trim()); }
-
-    function saveToken() {
-        const t = document.getElementById('tokenInput').value.trim();
-        if (!t) return;
-        storeToken(t);
-        setTokenStatus(true, 'Token saved — ready to publish');
-        flash('Token saved', 'ok', 2000);
-    }
-
-    function toggleTokenVisibility() {
-        const inp = document.getElementById('tokenInput');
-        inp.type = inp.type === 'password' ? 'text' : 'password';
-    }
-
-    // ── Status helpers ─────────────────────────────────
-    function setTokenStatus(ok, msg) {
-        document.getElementById('statusDot').className  = 'dot ' + (ok ? 'ok' : '');
-        document.getElementById('statusText').textContent = msg;
-    }
-
-    function flash(msg, type, duration) {
-        const el = document.getElementById('globalStatus');
+    function toast(msg, type, duration) {
+        const el = document.getElementById('toast');
         el.textContent = msg;
-        el.className = 'visible ' + (type || '');
-        clearTimeout(flash._t);
-        flash._t = setTimeout(() => { el.className = ''; }, duration || 3000);
+        el.className = 'show ' + (type || '');
+        clearTimeout(toast._t);
+        toast._t = setTimeout(() => { el.className = ''; }, duration || 3000);
     }
 
-    // ── Base64 encode/decode (UTF-8 safe) ─────────────
-    function toBase64(str)   { return btoa(unescape(encodeURIComponent(str))); }
-    function fromBase64(b64) { return decodeURIComponent(escape(atob(b64.replace(/\n/g, '')))); }
-
-    // ── Load sentences from public URL (no token needed) ──
     async function loadSentences() {
         try {
-            const r = await fetch(PAGES_URL + '?_=' + Date.now());
-            if (!r.ok) throw new Error('Could not load sentences.json');
-            const content = await r.json();
+            const r = await fetch('/sentences.json');
+            if (!r.ok) throw new Error('Server error ' + r.status);
+            const data = await r.json();
             KEYS.forEach(k => {
                 const el = document.getElementById(k);
-                if (el && content[k]) el.value = content[k];
+                if (el && data[k]) el.value = data[k];
             });
         } catch (e) {
-            flash('Could not load current sentences: ' + e.message, 'err', 5000);
+            toast('Could not load sentences: ' + e.message, 'err', 6000);
         }
     }
 
-    // ── Publish to GitHub (token required) ────────────
     async function publish() {
-        const token = getToken();
-        if (!token) { flash('Save your GitHub token first', 'err'); return; }
-
         const btn = document.getElementById('publishBtn');
         btn.disabled = true;
         btn.textContent = 'Publishing…';
 
+        const sentences = {};
+        KEYS.forEach(k => { sentences[k] = document.getElementById(k).value.trim(); });
+
         try {
-            // Fetch current sha
-            const shaResp = await fetch(API_URL, {
-                headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' }
-            });
-            if (shaResp.status === 401) throw new Error('Token rejected — check it has repo scope');
-            if (!shaResp.ok)            throw new Error(`GitHub error ${shaResp.status}`);
-            const { sha } = await shaResp.json();
-
-            // Build updated JSON
-            const sentences = {};
-            KEYS.forEach(k => { sentences[k] = document.getElementById(k).value.trim(); });
-
-            // Commit
-            const r = await fetch(API_URL, {
-                method: 'PUT',
-                headers: {
-                    Authorization:  `Bearer ${token}`,
-                    Accept:         'application/vnd.github+json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    message: 'Update sentence templates',
-                    content: toBase64(JSON.stringify(sentences, null, 2)),
-                    sha
-                })
+            const r = await fetch('/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(sentences, null, 2)
             });
 
             if (!r.ok) {
-                const err = await r.json().catch(() => ({}));
-                throw new Error(err.message || `GitHub error ${r.status}`);
+                const err = await r.text();
+                throw new Error(err || 'Server error ' + r.status);
             }
 
             btn.textContent = 'Published!';
             btn.classList.add('success');
-            flash('Published — live in the add-in within ~1 minute', 'ok', 4000);
-            setTimeout(() => { btn.textContent = 'Publish to live'; btn.classList.remove('success'); btn.disabled = false; }, 3000);
+            toast('Published — live in the add-in within ~1 minute', 'ok', 4000);
+            setTimeout(() => {
+                btn.textContent = 'Publish to live';
+                btn.classList.remove('success');
+                btn.disabled = false;
+            }, 3000);
 
         } catch (e) {
-            flash(e.message, 'err', 5000);
+            toast(e.message, 'err', 6000);
             btn.textContent = 'Publish to live';
             btn.disabled = false;
         }
     }
 
-    // ── Init ───────────────────────────────────────────
     loadSentences();
-
-    const savedToken = getToken();
-    if (savedToken) {
-        document.getElementById('tokenInput').value = savedToken;
-        setTokenStatus(true, 'Token saved — ready to publish');
-    }
 </script>
 
 </body>
