@@ -337,6 +337,21 @@
 </main>
 
 <script>
+    function fill(t, v) {
+        return t.replace(/\{([A-Z_]+)\}/g, (_, k) => v[k] !== undefined ? v[k] : '{' + k + '}');
+    }
+
+    let TEMPLATES = null;
+
+    async function loadTemplates() {
+        try {
+            const r = await fetch('sentences.json?_=' + Date.now());
+            TEMPLATES = await r.json();
+        } catch (e) { TEMPLATES = {}; }
+        update();
+        delivUpdate();
+    }
+
     // ── Config ───────────────────────────────────────────
     const WEEK_OPTIONS    = [2, 4, 6, 8, 10, 12, 14, 16];
     const DEFAULT_LOW     = 10;
@@ -428,6 +443,8 @@
         const high    = parseInt(highSel.value,    10);
         const signOff = parseInt(signOffSel.value, 10);
 
+        if (!TEMPLATES) { sentenceEl.textContent = 'Loading…'; insertBtn.disabled = true; return; }
+
         if (high < low) {
             errorEl.classList.add('visible');
             sentenceEl.textContent = '';
@@ -449,8 +466,7 @@
             const dateHigh  = addDays(today, high * 7);
             const diffYears = dateLow.getFullYear() !== dateHigh.getFullYear();
 
-            sentence = `As a guide, orders placed today are currently running on a ${low}–${high} week ` +
-                       `lead time, which would put your delivery at around ${fmt(dateLow, diffYears)} to ${fmt(dateHigh, true)}.`;
+            sentence = fill(TEMPLATES.fromToday, { LOW: low, HIGH: high, DATE_LOW: fmt(dateLow, diffYears), DATE_HIGH: fmt(dateHigh, true) });
 
             dateHintEl.textContent = `Low: ${fmt(dateLow, true)}  ·  High: ${fmt(dateHigh, true)}`;
 
@@ -461,9 +477,7 @@
             const diffYears = dateLow.getFullYear() !== dateHigh.getFullYear();
             const weekWord  = signOff === 1 ? 'week' : 'weeks';
 
-            sentence = `As a guide, if you are able to sign off within ${signOff} ${weekWord}, we would then be ` +
-                       `running on a ${low}–${high} week lead time, which would put your delivery at around ` +
-                       `${fmt(dateLow, diffYears)} to ${fmt(dateHigh, true)}.`;
+            sentence = fill(TEMPLATES.signOffWeeks, { N: signOff, WEEK_WORD: weekWord, LOW: low, HIGH: high, DATE_LOW: fmt(dateLow, diffYears), DATE_HIGH: fmt(dateHigh, true) });
 
             dateHintEl.textContent = `Low: ${fmt(dateLow, true)}  ·  High: ${fmt(dateHigh, true)}`;
 
@@ -480,9 +494,7 @@
             const dateHigh    = addDays(signOffDate, high * 7);
             const diffYears   = dateLow.getFullYear() !== dateHigh.getFullYear();
 
-            sentence = `As a guide, if you are able to sign off by ${fmt(signOffDate, true)}, we would then be ` +
-                       `running on a ${low}–${high} week lead time, which would put your delivery at around ` +
-                       `${fmt(dateLow, diffYears)} to ${fmt(dateHigh, true)}.`;
+            sentence = fill(TEMPLATES.signOffByDate, { SIGN_OFF_DATE: fmt(signOffDate, true), LOW: low, HIGH: high, DATE_LOW: fmt(dateLow, diffYears), DATE_HIGH: fmt(dateHigh, true) });
 
             dateHintEl.textContent = `Low: ${fmt(dateLow, true)}  ·  High: ${fmt(dateHigh, true)}`;
         }
@@ -514,6 +526,8 @@
         const low  = parseInt(delivLowSel.value,  10);
         const high = parseInt(delivHighSel.value, 10);
 
+        if (!TEMPLATES) { delivSentenceEl.textContent = 'Loading…'; delivInsertBtn.disabled = true; return; }
+
         if (high < low) {
             delivErrorEl.classList.add('visible');
             delivSentenceEl.textContent = '';
@@ -544,19 +558,13 @@
         let sentence;
 
         if (delivDate <= today) {
-            sentence = `Unfortunately, ${fmt(delivDate, true)} has already passed. With our current ` +
-                       `${low}–${high} week lead time, we can now deliver from around ` +
-                       `${fmt(earliestDeliv, diffYearsNow)} to ${fmt(latestDeliv, true)}.`;
+            sentence = fill(TEMPLATES.clientDatePassed, { DELIVERY_DATE: fmt(delivDate, true), LOW: low, HIGH: high, DATE_LOW: fmt(earliestDeliv, diffYearsNow), DATE_HIGH: fmt(latestDeliv, true) });
             delivDateHintEl.textContent = `Earliest: ${fmt(earliestDeliv, true)}  ·  Latest: ${fmt(latestDeliv, true)}`;
         } else if (orderByDate < today) {
-            sentence = `Unfortunately, a delivery of ${fmt(delivDate, true)} is no longer achievable — ` +
-                       `to have met this date, you would have needed to sign off by ${fmt(orderByDate, true)}. ` +
-                       `With our current ${low}–${high} week lead time, we can now deliver from around ` +
-                       `${fmt(earliestDeliv, diffYearsNow)} to ${fmt(latestDeliv, true)}.`;
+            sentence = fill(TEMPLATES.clientSignOffMissed, { DELIVERY_DATE: fmt(delivDate, true), SIGN_OFF_BY: fmt(orderByDate, true), LOW: low, HIGH: high, DATE_LOW: fmt(earliestDeliv, diffYearsNow), DATE_HIGH: fmt(latestDeliv, true) });
             delivDateHintEl.textContent = `Sign-off was due: ${fmt(orderByDate, true)}  ·  Earliest now: ${fmt(earliestDeliv, true)}`;
         } else {
-            sentence = `To achieve a delivery date of around ${fmt(delivDate, true)}, with our current ` +
-                       `${low}–${high} week lead time, you would need to sign off by ${fmt(orderByDate, true)}.`;
+            sentence = fill(TEMPLATES.clientAchievable, { DELIVERY_DATE: fmt(delivDate, true), LOW: low, HIGH: high, SIGN_OFF_BY: fmt(orderByDate, true) });
             delivDateHintEl.textContent = `Sign off by: ${fmt(orderByDate, true)}`;
         }
 
@@ -637,8 +645,7 @@
         Office.onReady(() => { officeReady = true; });
     }
 
-    update();
-    delivUpdate();
+    loadTemplates();
 </script>
 
 </body>

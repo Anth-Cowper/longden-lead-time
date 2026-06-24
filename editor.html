@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sentence Editor — Longden Doors</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --brand: #2b5a39;
+    --brand-dark: #1e3f28;
+    --brand-faint: #eef3f0;
+    --accent: #b07d3a;
+    --ground: #f2f0ec;
+    --surface: #ffffff;
+    --text: #1c1c19;
+    --muted: #6b6960;
+    --border: #ddd9d0;
+    --danger: #b91c1c;
+    --success: #16a34a;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--ground);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+}
+
+/* ── Top bar ── */
+.topbar {
+    background: var(--brand);
+    color: white;
+    padding: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 52px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.topbar-title { font-size: 0.82rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.topbar-sub   { font-size: 0.68rem; opacity: 0.65; margin-top: 1px; }
+
+.btn-publish {
+    background: white;
+    color: var(--brand);
+    border: none;
+    border-radius: 4px;
+    padding: 0.5rem 1.2rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+}
+.btn-publish:hover:not(:disabled) { background: #e8f2ec; }
+.btn-publish:active { transform: scale(0.97); }
+.btn-publish:disabled { opacity: 0.45; cursor: default; }
+.btn-publish.success { background: #dcfce7; color: var(--success); }
+
+/* ── Token bar ── */
+.token-bar {
+    background: var(--brand-faint);
+    border-bottom: 1px solid #c9ddd0;
+    padding: 0.6rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.token-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--brand);
+    white-space: nowrap;
+}
+
+.token-input-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+    max-width: 420px;
+}
+
+.token-input {
+    width: 100%;
+    padding: 0.4rem 2.2rem 0.4rem 0.6rem;
+    border: 1.5px solid #b5ccbb;
+    border-radius: 4px;
+    font-size: 0.82rem;
+    font-family: Consolas, monospace;
+    background: white;
+    color: var(--text);
+}
+
+.token-input:focus { outline: none; border-color: var(--brand); }
+
+.token-eye {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1;
+    padding: 0.1rem;
+}
+
+.token-save {
+    padding: 0.4rem 0.85rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    background: var(--brand);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.token-save:hover { background: var(--brand-dark); }
+
+.token-status {
+    font-size: 0.72rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--muted);
+}
+
+.dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--muted);
+    flex-shrink: 0;
+}
+
+.dot.ok  { background: var(--success); }
+.dot.err { background: var(--danger); }
+
+/* ── Main content ── */
+main {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 1.5rem 1.5rem 4rem;
+}
+
+.section-head {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.section-name {
+    font-size: 0.63rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--brand);
+    white-space: nowrap;
+}
+
+.section-rule {
+    flex: 1;
+    height: 1px;
+    background: var(--brand);
+    opacity: 0.2;
+}
+
+/* ── Template card ── */
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    margin-bottom: 0.65rem;
+    overflow: hidden;
+}
+
+.card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 0.45rem 0.85rem;
+    background: var(--brand-faint);
+    border-bottom: 1px solid var(--border);
+}
+
+.card-name {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--brand);
+}
+
+.card-when { font-size: 0.63rem; color: var(--muted); }
+
+.card-body { padding: 0.75rem 0.85rem 0.65rem; }
+
+textarea {
+    width: 100%;
+    padding: 0.6rem 0.7rem;
+    border: 1.5px solid var(--border);
+    border-radius: 3px;
+    font-size: 0.875rem;
+    line-height: 1.65;
+    color: var(--text);
+    background: #fdfdfc;
+    resize: vertical;
+    min-height: 72px;
+    font-family: inherit;
+    transition: border-color 0.15s;
+}
+
+textarea:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 2px rgba(43,90,57,0.1); }
+
+.vars {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-top: 0.5rem;
+}
+
+.var-chip {
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 0.68rem;
+    padding: 0.15rem 0.45rem;
+    background: var(--brand-faint);
+    border: 1px solid #c9ddd0;
+    border-radius: 2px;
+    color: var(--brand);
+    cursor: default;
+    user-select: all;
+}
+
+/* ── Status bar ── */
+#globalStatus {
+    position: fixed;
+    bottom: 1.25rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--text);
+    color: white;
+    padding: 0.55rem 1.1rem;
+    border-radius: 4px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.22);
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+#globalStatus.visible { opacity: 1; }
+#globalStatus.ok  { background: var(--success); }
+#globalStatus.err { background: var(--danger); }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="topbar">
+    <div>
+        <div class="topbar-title">Longden Doors</div>
+        <div class="topbar-sub">Sentence Editor</div>
+    </div>
+    <button class="btn-publish" id="publishBtn" onclick="publish()">Publish to live</button>
+</div>
+
+<!-- Token bar -->
+<div class="token-bar">
+    <span class="token-label">GitHub Token</span>
+    <div class="token-input-wrap">
+        <input class="token-input" type="password" id="tokenInput" placeholder="ghp_xxxxxxxxxxxx  (needs repo scope)">
+        <button class="token-eye" id="tokenEye" onclick="toggleTokenVisibility()" title="Show/hide">&#128065;</button>
+    </div>
+    <button class="token-save" onclick="saveToken()">Save</button>
+    <div class="token-status">
+        <div class="dot" id="statusDot"></div>
+        <span id="statusText">Enter token and click Save to connect</span>
+    </div>
+</div>
+
+<!-- Main -->
+<main>
+
+    <div class="section-head">
+        <span class="section-name">Tab: Lead Time</span>
+        <div class="section-rule"></div>
+    </div>
+
+    <div class="card">
+        <div class="card-head">
+            <span class="card-name">From today</span>
+            <span class="card-when">Mode toggle → From today</span>
+        </div>
+        <div class="card-body">
+            <textarea id="fromToday" rows="3"></textarea>
+            <div class="vars">
+                <span class="var-chip">{LOW}</span>
+                <span class="var-chip">{HIGH}</span>
+                <span class="var-chip">{DATE_LOW}</span>
+                <span class="var-chip">{DATE_HIGH}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-head">
+            <span class="card-name">Sign off — in N weeks</span>
+            <span class="card-when">Mode toggle → Sign off</span>
+        </div>
+        <div class="card-body">
+            <textarea id="signOffWeeks" rows="4"></textarea>
+            <div class="vars">
+                <span class="var-chip">{N}</span>
+                <span class="var-chip">{WEEK_WORD}</span>
+                <span class="var-chip">{LOW}</span>
+                <span class="var-chip">{HIGH}</span>
+                <span class="var-chip">{DATE_LOW}</span>
+                <span class="var-chip">{DATE_HIGH}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-head">
+            <span class="card-name">Sign off — by date</span>
+            <span class="card-when">Mode toggle → By date</span>
+        </div>
+        <div class="card-body">
+            <textarea id="signOffByDate" rows="4"></textarea>
+            <div class="vars">
+                <span class="var-chip">{SIGN_OFF_DATE}</span>
+                <span class="var-chip">{LOW}</span>
+                <span class="var-chip">{HIGH}</span>
+                <span class="var-chip">{DATE_LOW}</span>
+                <span class="var-chip">{DATE_HIGH}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-head">
+        <span class="section-name">Tab: Client Delivery Date</span>
+        <div class="section-rule"></div>
+    </div>
+
+    <div class="card">
+        <div class="card-head">
+            <span class="card-name">Date is achievable</span>
+            <span class="card-when">Delivery date still reachable</span>
+        </div>
+        <div class="card-body">
+            <textarea id="clientAchievable" rows="3"></textarea>
+            <div class="vars">
+                <span class="var-chip">{DELIVERY_DATE}</span>
+                <span class="var-chip">{LOW}</span>
+                <span class="var-chip">{HIGH}</span>
+                <span class="var-chip">{SIGN_OFF_BY}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-head">
+            <span class="card-name">Sign-off window has passed</span>
+            <span class="card-when">Delivery date future — but sign-off deadline missed</span>
+        </div>
+        <div class="card-body">
+            <textarea id="clientSignOffMissed" rows="5"></textarea>
+            <div class="vars">
+                <span class="var-chip">{DELIVERY_DATE}</span>
+                <span class="var-chip">{SIGN_OFF_BY}</span>
+                <span class="var-chip">{LOW}</span>
+                <span class="var-chip">{HIGH}</span>
+                <span class="var-chip">{DATE_LOW}</span>
+                <span class="var-chip">{DATE_HIGH}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-head">
+            <span class="card-name">Delivery date has already passed</span>
+            <span class="card-when">Delivery date ≤ today</span>
+        </div>
+        <div class="card-body">
+            <textarea id="clientDatePassed" rows="3"></textarea>
+            <div class="vars">
+                <span class="var-chip">{DELIVERY_DATE}</span>
+                <span class="var-chip">{LOW}</span>
+                <span class="var-chip">{HIGH}</span>
+                <span class="var-chip">{DATE_LOW}</span>
+                <span class="var-chip">{DATE_HIGH}</span>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<div id="globalStatus"></div>
+
+<script>
+    const REPO    = 'anth-cowper/longden-lead-time';
+    const FILE    = 'sentences.json';
+    const API_URL = `https://api.github.com/repos/${REPO}/contents/${FILE}`;
+    const KEYS    = ['fromToday','signOffWeeks','signOffByDate','clientAchievable','clientSignOffMissed','clientDatePassed'];
+
+    let currentSha = null;
+
+    // ── Token helpers ──────────────────────────────────
+    function getToken()      { return localStorage.getItem('gh_token') || ''; }
+    function storeToken(t)   { localStorage.setItem('gh_token', t.trim()); }
+
+    function saveToken() {
+        const t = document.getElementById('tokenInput').value.trim();
+        if (!t) return;
+        storeToken(t);
+        load();
+    }
+
+    function toggleTokenVisibility() {
+        const inp = document.getElementById('tokenInput');
+        inp.type = inp.type === 'password' ? 'text' : 'password';
+    }
+
+    // ── Status helpers ─────────────────────────────────
+    function setConnected(ok, msg) {
+        const dot  = document.getElementById('statusDot');
+        const text = document.getElementById('statusText');
+        dot.className  = 'dot ' + (ok ? 'ok' : 'err');
+        text.textContent = msg;
+    }
+
+    function flash(msg, type, duration) {
+        const el = document.getElementById('globalStatus');
+        el.textContent = msg;
+        el.className = 'visible ' + (type || '');
+        clearTimeout(flash._t);
+        flash._t = setTimeout(() => { el.className = ''; }, duration || 3000);
+    }
+
+    // ── Base64 encode/decode with UTF-8 support ────────
+    function toBase64(str)   { return btoa(unescape(encodeURIComponent(str))); }
+    function fromBase64(b64) { return decodeURIComponent(escape(atob(b64.replace(/\n/g, '')))); }
+
+    // ── Load from GitHub ───────────────────────────────
+    async function load() {
+        const token = getToken();
+        if (!token) { setConnected(false, 'No token saved'); return; }
+
+        setConnected(false, 'Connecting…');
+
+        try {
+            const r = await fetch(API_URL, {
+                headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' }
+            });
+
+            if (r.status === 401) throw new Error('Token rejected — check it has repo scope');
+            if (r.status === 404) throw new Error('File not found — check repo name');
+            if (!r.ok)            throw new Error(`GitHub error ${r.status}`);
+
+            const data    = await r.json();
+            currentSha    = data.sha;
+            const content = JSON.parse(fromBase64(data.content));
+
+            KEYS.forEach(k => {
+                const el = document.getElementById(k);
+                if (el) el.value = content[k] || '';
+            });
+
+            setConnected(true, 'Connected — sentences loaded');
+        } catch (e) {
+            setConnected(false, e.message);
+            flash(e.message, 'err', 4000);
+        }
+    }
+
+    // ── Publish to GitHub ──────────────────────────────
+    async function publish() {
+        const token = getToken();
+        if (!token) { flash('Save your GitHub token first', 'err'); return; }
+        if (!currentSha) { flash('Load current sentences first', 'err'); return; }
+
+        const btn = document.getElementById('publishBtn');
+        btn.disabled = true;
+        btn.textContent = 'Publishing…';
+
+        const sentences = {};
+        KEYS.forEach(k => { sentences[k] = document.getElementById(k).value.trim(); });
+
+        try {
+            const r = await fetch(API_URL, {
+                method: 'PUT',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    Accept:        'application/vnd.github+json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: 'Update sentence templates',
+                    content: toBase64(JSON.stringify(sentences, null, 2)),
+                    sha:     currentSha
+                })
+            });
+
+            if (!r.ok) {
+                const err = await r.json().catch(() => ({}));
+                throw new Error(err.message || `GitHub error ${r.status}`);
+            }
+
+            const data = await r.json();
+            currentSha = data.content.sha;
+
+            btn.textContent = 'Published!';
+            btn.classList.add('success');
+            flash('Published — live in the add-in within ~1 minute', 'ok', 4000);
+            setTimeout(() => { btn.textContent = 'Publish to live'; btn.classList.remove('success'); btn.disabled = false; }, 3000);
+
+        } catch (e) {
+            flash(e.message, 'err', 5000);
+            btn.textContent = 'Publish to live';
+            btn.disabled = false;
+        }
+    }
+
+    // ── Init ───────────────────────────────────────────
+    const savedToken = getToken();
+    if (savedToken) {
+        document.getElementById('tokenInput').value = savedToken;
+        load();
+    }
+</script>
+
+</body>
+</html>
