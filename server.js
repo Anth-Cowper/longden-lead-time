@@ -53,8 +53,16 @@ const server = http.createServer((req, res) => {
     }
 });
 
+server.on('error', (e) => {
+    if (e.code === 'EADDRINUSE') {
+        // Already running — just open the browser
+        exec(`start http://localhost:${PORT}`);
+        process.exit(0);
+    } else {
+        throw e;
+    }
+});
+
 server.listen(PORT, '127.0.0.1', () => {
-    console.log('Sentence editor running — opening browser...');
     exec(`start http://localhost:${PORT}`);
-    console.log('Press Ctrl+C to stop.\n');
 });

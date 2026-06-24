@@ -1,4 +1,3 @@
 @echo off
 cd /d "%~dp0"
-echo Starting sentence editor...
-node server.js
+powershell -WindowStyle Hidden -Command "Start-Process node -ArgumentList 'server.js' -WorkingDirectory '%CD%' -WindowStyle Hidden"
