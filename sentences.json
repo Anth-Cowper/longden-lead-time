@@ -1,5 +1,5 @@
 {
-  "fromToday": "As a guide, orders placed today are currently running on a {LOW}–{HIGH} week lead time, which would put your delivery at around {DATE_LOW} to {DATE_HIGH}.",
+  "fromToday": "As a guide, if sign off is recieved today we are running on a {LOW}–{HIGH} week lead time, which would put your delivery at around {DATE_LOW} to {DATE_HIGH}.",
   "signOffWeeks": "As a guide, if you are able to sign off within {N} {WEEK_WORD}, we would then be running on a {LOW}–{HIGH} week lead time, which would put your delivery at around {DATE_LOW} to {DATE_HIGH}.",
   "signOffByDate": "As a guide, if you are able to sign off by {SIGN_OFF_DATE}, we would then be running on a {LOW}–{HIGH} week lead time, which would put your delivery at around {DATE_LOW} to {DATE_HIGH}.",
   "clientAchievable": "To achieve a delivery date of around {DELIVERY_DATE}, with our current {LOW}–{HIGH} week lead time, you would need to sign off by {SIGN_OFF_BY}.",
