@@ -347,6 +347,8 @@
         try {
             const r = await fetch('sentences.json?_=' + Date.now());
             TEMPLATES = await r.json();
+            if (TEMPLATES.defaultLow)  { lowSel.value = TEMPLATES.defaultLow;  delivLowSel.value  = TEMPLATES.defaultLow; }
+            if (TEMPLATES.defaultHigh) { highSel.value = TEMPLATES.defaultHigh; delivHighSel.value = TEMPLATES.defaultHigh; }
         } catch (e) { TEMPLATES = {}; }
         update();
         delivUpdate();

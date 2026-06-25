@@ -178,6 +178,28 @@ textarea:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 2p
 
 <main>
 
+    <div class="section-head" style="margin-top:0">
+        <span class="section-name">Defaults</span>
+        <div class="section-rule"></div>
+    </div>
+
+    <div class="card">
+        <div class="card-head">
+            <span class="card-name">Default week range</span>
+            <span class="card-when">Pre-selected values when the add-in opens</span>
+        </div>
+        <div class="card-body" style="display:flex;gap:1rem">
+            <div style="flex:1">
+                <div class="card-name" style="margin-bottom:0.35rem">Default low week</div>
+                <select id="defaultLow" style="width:100%;padding:0.5rem 0.6rem;border:1.5px solid var(--border);border-radius:3px;font-size:0.9rem;color:var(--text);background:var(--surface)"></select>
+            </div>
+            <div style="flex:1">
+                <div class="card-name" style="margin-bottom:0.35rem">Default high week</div>
+                <select id="defaultHigh" style="width:100%;padding:0.5rem 0.6rem;border:1.5px solid var(--border);border-radius:3px;font-size:0.9rem;color:var(--text);background:var(--surface)"></select>
+            </div>
+        </div>
+    </div>
+
     <div class="section-head">
         <span class="section-name">Tab: Lead Time</span>
         <div class="section-rule"></div>
@@ -296,6 +318,16 @@ textarea:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 2p
 
 <script>
     const KEYS = ['fromToday','signOffWeeks','signOffByDate','clientAchievable','clientSignOffMissed','clientDatePassed'];
+    const WEEK_OPTIONS = [2, 4, 6, 8, 10, 12, 14, 16];
+
+    ['defaultLow','defaultHigh'].forEach(id => {
+        const sel = document.getElementById(id);
+        WEEK_OPTIONS.forEach(w => {
+            const opt = document.createElement('option');
+            opt.value = w; opt.textContent = w;
+            sel.appendChild(opt);
+        });
+    });
 
     function toast(msg, type, duration) {
         const el = document.getElementById('toast');
@@ -314,6 +346,8 @@ textarea:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 2p
                 const el = document.getElementById(k);
                 if (el && data[k]) el.value = data[k];
             });
+            if (data.defaultLow)  document.getElementById('defaultLow').value  = data.defaultLow;
+            if (data.defaultHigh) document.getElementById('defaultHigh').value = data.defaultHigh;
         } catch (e) {
             toast('Could not load sentences: ' + e.message, 'err', 6000);
         }
@@ -325,6 +359,8 @@ textarea:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 2p
         btn.textContent = 'Publishing…';
 
         const sentences = {};
+        sentences.defaultLow  = parseInt(document.getElementById('defaultLow').value,  10);
+        sentences.defaultHigh = parseInt(document.getElementById('defaultHigh').value, 10);
         KEYS.forEach(k => { sentences[k] = document.getElementById(k).value.trim(); });
 
         try {

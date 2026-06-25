@@ -1,4 +1,6 @@
 {
+  "defaultLow": 10,
+  "defaultHigh": 12,
   "fromToday": "As a guide, if sign off is received today we are running on a {LOW}–{HIGH} week lead time, which would put your delivery at around {DATE_LOW} to {DATE_HIGH}.",
   "signOffWeeks": "As a guide, if you are able to sign off within {N} {WEEK_WORD}, we would then be running on a {LOW}–{HIGH} week lead time, which would put your delivery at around {DATE_LOW} to {DATE_HIGH}.",
   "signOffByDate": "As a guide, if you are able to sign off by {SIGN_OFF_DATE}, we would then be running on a {LOW}–{HIGH} week lead time, which would put your delivery at around {DATE_LOW} to {DATE_HIGH}.",
